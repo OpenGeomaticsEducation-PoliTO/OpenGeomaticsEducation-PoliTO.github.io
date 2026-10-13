@@ -24,4 +24,15 @@ We are an international group of university teachers and researchers who share e
 - **Cite them** — stable versions are archived on [Zenodo](https://zenodo.org/communities/opengeomaticseducation) with a DOI.
 - **Improve them** — found an error? Use the *Report an issue* link on every page.
 
+## Open courses
+
+Complete course paths, organized in modules with interactive tools and self-assessment quizzes.
+
+::: {.resource-card}
+### [Geomatics (MSc) — Open Course](https://opengeomaticseducation-polito.github.io/geomatics-msc/)
+Reference systems and frames · Least squares and reliability · GNSS positioning · Photogrammetry.
+7 interactive tools, 27 self-assessment questions, worked exercises on ITRF/ETRF transformations and heights.
+<a class="launch-btn" href="https://opengeomaticseducation-polito.github.io/geomatics-msc/">▶ Go to the course</a>
+:::
+
 ## Resources

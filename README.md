@@ -6,6 +6,10 @@
 📦 **Archive & DOI:** https://zenodo.org/communities/opengeomaticseducation
 📜 **Licence:** content [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) · code MIT
 
+## Open courses
+
+- [Geomatics (MSc) — Open Course](https://opengeomaticseducation-polito.github.io/geomatics-msc/) — reference systems, least squares, GNSS, photogrammetry ([repository](https://github.com/OpenGeomaticsEducation-PoliTO/geomatics-msc))
+
 ## What you find here
 
 | Resource | Level | Topics |
