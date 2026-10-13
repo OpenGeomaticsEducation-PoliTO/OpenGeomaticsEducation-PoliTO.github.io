@@ -11,6 +11,7 @@
 | Resource | Level | Topics |
 |---|---|---|
 | [Repeated Angle Measurements](resources/repeated-angle-measurements/) | Bachelor | surveying, measurement theory |
+| [Photogrammetric Flight Planning](resources/photogrammetric-flight-planning/) | Bachelor / Master | photogrammetry, flight planning, UAV |
 
 All worksheets run in the browser, need no installation and work offline.
 

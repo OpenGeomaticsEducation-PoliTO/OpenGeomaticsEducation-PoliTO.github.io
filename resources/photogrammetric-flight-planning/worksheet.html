@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progetto di Presa Fotogrammetrica</title>
+<meta name="description" content="Interactive photogrammetric flight planning worksheet: GSD, scale, footprint, base, strip spacing and field angles for a wide range of cameras.">
+<link rel="stylesheet" href="lib/katex/katex.min.css">
+<script src="lib/katex/katex.min.js"></script>
+<style>
+  :root {
+    --navy: #1C3B6E; --navy-dark: #122848; --navy-light: #2a5298;
+    --orange: #E87722; --cream: #FAF8F4;
+    --slate: #4a5568; --slate-light: #718096;
+    --border: #dde3ed; --card-bg: #ffffff; --formula-bg: #f0f4fb;
+    --green: #1a7a42; --amber: #b36b00;
+    --shadow: 0 2px 12px rgba(28,59,110,0.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family:'Outfit',system-ui,-apple-system,'Segoe UI',sans-serif; background:var(--cream); color:#1a202c; min-height:100vh; font-size:14px; line-height:1.6; }
+
+  /* KaTeX */
+  .katex { font-size:1em !important; }
+  .formula-box .katex { color:#1C3B6E; }
+  .formula-table td .katex { font-size:0.9em !important; }
+
+  /* HEADER */
+  header { background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy) 60%,#2560ad 100%); color:#fff; position:relative; overflow:hidden; }
+  header::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.015) 40px,rgba(255,255,255,0.015) 41px); }
+  .header-inner { position:relative; display:flex; align-items:center; gap:18px; padding:20px 36px 16px; }
+  .header-badge { background:var(--orange); color:#fff; font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:4px 10px; border-radius:4px; white-space:nowrap; }
+  .header-title h1 { font-family:'Libre Baskerville',serif; font-size:20px; font-weight:700; color:#fff; }
+  .header-title p { font-size:11.5px; color:rgba(255,255,255,0.58); margin-top:1px; }
+  .header-tabs { display:flex; padding:0 36px; border-top:1px solid rgba(255,255,255,0.08); }
+  .tab-btn { background:none; border:none; color:rgba(255,255,255,0.55); font-family:'Outfit',sans-serif; font-size:12.5px; font-weight:500; cursor:pointer; padding:10px 18px; position:relative; transition:color .2s; }
+  .tab-btn.active { color:#fff; }
+  .tab-btn.active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:var(--orange); border-radius:2px 2px 0 0; }
+  .tab-btn:hover { color:rgba(255,255,255,0.85); }
+
+  /* LAYOUT */
+  .main-layout { display:grid; grid-template-columns:330px 1fr; min-height:calc(100vh - 96px); }
+
+  /* LEFT PANEL */
+  .left-panel { background:var(--card-bg); border-right:1px solid var(--border); padding:20px 16px; overflow-y:auto; }
+  .panel-title { font-size:10px; font-weight:700; letter-spacing:1.8px; text-transform:uppercase; color:var(--slate-light); margin:14px 0 9px; display:flex; align-items:center; gap:8px; }
+  .panel-title:first-child { margin-top:0; }
+  .panel-title::after { content:''; flex:1; height:1px; background:var(--border); }
+  .sel-wrap { position:relative; margin-bottom:12px; }
+  .sel-wrap select { width:100%; padding:9px 32px 9px 10px; border:1.5px solid var(--border); border-radius:8px; background:#fff; color:#1a202c; font-family:'Outfit',sans-serif; font-size:13px; cursor:pointer; appearance:none; }
+  .sel-wrap select:focus { outline:none; border-color:var(--navy-light); }
+  .sel-wrap::after { content:'▾'; position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--slate); pointer-events:none; }
+  .inp-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+  .flabel { display:block; font-size:11px; font-weight:600; color:var(--slate); margin-bottom:3px; }
+  .flabel .u { font-weight:400; color:var(--slate-light); }
+  .inp { width:100%; padding:7px 9px; border:1.5px solid var(--border); border-radius:6px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--navy-dark); }
+  .inp:focus { outline:none; border-color:var(--navy-light); }
+  .alt-hdr { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px; }
+  .alt-val { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:600; color:var(--navy); }
+  .alt-val span { font-size:12px; color:var(--slate-light); }
+  input[type=range] { width:100%; height:4px; -webkit-appearance:none; background:linear-gradient(to right,var(--navy-light) 0%,var(--navy-light) var(--pct,30%),var(--border) var(--pct,30%)); border-radius:2px; cursor:pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--navy); border:2.5px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.25); cursor:pointer; }
+  .rng-lbl { display:flex; justify-content:space-between; font-size:10px; color:var(--slate-light); margin-top:2px; }
+  .ov-row { display:flex; gap:8px; margin-bottom:6px; }
+  .ov-field { flex:1; }
+  .ov-disp { background:var(--formula-bg); border-radius:6px; padding:7px 10px; font-size:12px; color:var(--slate); margin-top:5px; display:flex; justify-content:space-between; }
+  .ov-disp strong { color:var(--navy); font-family:'JetBrains Mono',monospace; }
+  #sensorDiagram { width:100%; border-radius:8px; margin:9px 0; display:block; }
+
+  /* RIGHT PANEL */
+  .right-panel { padding:20px 24px; overflow-y:auto; }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+  .sec-hdg { font-size:11px; font-weight:700; letter-spacing:1.6px; text-transform:uppercase; color:var(--slate-light); margin:18px 0 11px; display:flex; align-items:center; gap:10px; }
+  .sec-hdg:first-child { margin-top:0; }
+  .sec-hdg::before { content:''; width:18px; height:2px; background:var(--orange); border-radius:1px; }
+
+  /* CARDS */
+  .rgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(265px,1fr)); gap:11px; margin-bottom:4px; }
+  .pcard { background:var(--card-bg); border:1.5px solid var(--border); border-radius:10px; overflow:hidden; transition:box-shadow .2s; }
+  .pcard:hover { box-shadow:var(--shadow); }
+  .pcard-hdr { padding:9px 13px 8px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border); }
+  .picon { width:26px; height:26px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+  .pname { font-size:12px; font-weight:600; color:var(--slate); line-height:1.3; }
+  .pbody { padding:10px 13px 12px; }
+  .pval { font-family:'JetBrains Mono',monospace; font-size:21px; font-weight:600; color:var(--navy); line-height:1.1; margin-bottom:2px; }
+  .pval .ut { font-size:12px; font-weight:400; color:var(--slate-light); margin-left:3px; }
+  .formula-box { background:var(--formula-bg); border-radius:6px; padding:8px 12px; margin-top:8px; border-left:3px solid var(--orange); overflow-x:auto; min-height:36px; display:flex; align-items:center; }
+  .pdesc { font-size:11px; color:var(--slate-light); margin-top:6px; line-height:1.5; }
+  .pnote { font-size:11px; color:var(--slate-light); margin-top:4px; background:#f7f9ff; border-radius:4px; padding:4px 8px; font-family:'JetBrains Mono',monospace; }
+
+  .sec-camera .picon { background:#e8f0fb; color:var(--navy); }
+  .sec-scale  .picon { background:#e6f4ea; color:var(--green); }
+  .sec-angle  .picon { background:#fff3e0; color:var(--amber); }
+  .sec-res    .picon { background:#f3e8fd; color:#7b2d9e; }
+  .sec-camera .pcard { border-color:#c8d8f0; }
+  .sec-scale  .pcard { border-color:#b2ddc0; }
+  .sec-angle  .pcard { border-color:#f0d08a; }
+  .sec-res    .pcard { border-color:#d8b4f8; }
+
+  /* FORMULA TABLE */
+  .ftable { width:100%; border-collapse:collapse; font-size:12.5px; }
+  .ftable thead { background:var(--navy); color:#fff; }
+  .ftable thead th { padding:10px 14px; text-align:left; font-size:11px; font-weight:600; letter-spacing:0.5px; }
+  .ftable tbody tr { border-bottom:1px solid var(--border); }
+  .ftable tbody tr:hover { background:#f7f9ff; }
+  .ftable td { padding:9px 14px; vertical-align:middle; }
+  .ftable td:first-child { color:var(--slate); font-weight:500; font-size:12px; }
+  .ftable td.mc { padding:6px 14px; }
+  .ftable td:last-child { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--navy); text-align:right; white-space:nowrap; }
+  .ftable tr.irow td { background:#fffbf5; }
+  .ftable tr.irow td:first-child { color:var(--amber); font-weight:700; }
+  .ibadge { display:inline-block; font-size:9px; font-weight:700; letter-spacing:0.5px; padding:1px 6px; border-radius:10px; text-transform:uppercase; background:#ffedd5; color:#9a3412; vertical-align:middle; margin-left:4px; }
+
+  /* CANVAS */
+  .cv-wrap { background:var(--card-bg); border-radius:12px; padding:18px; border:1.5px solid var(--border); margin-bottom:16px; }
+  .cv-title { font-size:13px; font-weight:600; color:var(--navy); margin-bottom:12px; }
+  #footprintCanvas, #angleCanvas { border-radius:8px; display:block; border:1.5px solid var(--border); }
+
+  /* COMPARE */
+  .cmp-wrap { overflow-x:auto; }
+  .cmptable { width:100%; border-collapse:collapse; font-size:11.5px; white-space:nowrap; }
+  .cmptable thead { background:var(--navy); color:#fff; position:sticky; top:0; z-index:2; }
+  .cmptable th { padding:9px 11px; font-weight:600; font-size:10.5px; }
+  .cmptable td { padding:7px 11px; border-bottom:1px solid var(--border); }
+  .cmptable tr.hl td { background:#eef4ff; font-weight:600; color:var(--navy); }
+  .cmptable td:first-child { font-weight:600; color:var(--slate); position:sticky; left:0; background:inherit; z-index:1; }
+  .cmptable tr:hover td { background:#f7f9ff; }
+  .mono { font-family:'JetBrains Mono',monospace; }
+  .vbar { display:inline-block; height:5px; border-radius:3px; background:var(--navy-light); vertical-align:middle; margin-left:4px; opacity:.45; min-width:2px; }
+
+  .ibox { border-radius:8px; padding:11px 15px; margin-bottom:14px; font-size:12.5px; display:flex; gap:10px; align-items:flex-start; }
+  .ibox.blue { background:#e8f0fb; border:1px solid #b8cff0; color:#1a3a6b; }
+  .ibox.orange { background:#fff3e0; border:1px solid #f5c880; color:#7a4000; }
+  .badge { display:inline-block; font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:10px; text-transform:uppercase; vertical-align:middle; margin-left:4px; background:#ffedd5; color:#9a3412; }
+
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-thumb { background:#c8d8ef; border-radius:3px; }
+
+  /* ── TOOLTIP ── */
+  #tt {
+    position: fixed;
+    z-index: 9999;
+    max-width: 300px;
+    background: var(--navy-dark);
+    color: #e8eef8;
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .18s ease, transform .18s ease;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.30), 0 2px 8px rgba(0,0,0,0.20);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  #tt.show { opacity: 1; transform: translateY(0); }
+  #tt .tt-title {
+    font-weight: 700; font-size: 12px; letter-spacing: 0.3px;
+    color: var(--orange); margin-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 5px;
+  }
+  #tt .tt-body { color: rgba(232,238,248,0.88); }
+  #tt .tt-formula {
+    margin-top: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 5px; padding: 5px 9px;
+    border-left: 2px solid var(--orange);
+    font-size: 11.5px;
+  }
+  #tt .tt-formula .katex { color: #ffd580 !important; font-size: 0.88em !important; }
+  #tt .tt-tag {
+    display: inline-block; margin-top: 8px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+    text-transform: uppercase; padding: 2px 7px; border-radius: 10px;
+    background: rgba(232,119,34,0.25); color: var(--orange);
+  }
+  /* Subtle hover highlight on cards */
+  .pcard[data-tip] { cursor: help; }
+  .pcard[data-tip]:hover { border-color: rgba(232,119,34,0.5) !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-badge">Open Geomatics</div>
+    <div class="header-title">
+      <h1>Progetto di Presa Fotogrammetrica</h1>
+      <p>Worksheet interattivo · Open Geomatics Education Group</p>
+    </div>
+  </div>
+  <div class="header-tabs">
+    <button class="tab-btn active" onclick="showTab('parametri',this)">📐 Parametri</button>
+    <button class="tab-btn" onclick="showTab('angoli',this)">📡 Angoli & Footprint</button>
+    <button class="tab-btn" onclick="showTab('formule',this)">∫ Tutte le formule</button>
+    <button class="tab-btn" onclick="showTab('confronto',this)">⚖ Confronto camere</button>
+    <button class="tab-btn" onclick="showTab('iso3d',this)">🚁 Vista 3D</button>
+  </div>
+</header>
+
+<div class="main-layout">
+  <aside class="left-panel">
+    <div class="panel-title">Seleziona camera</div>
+    <div class="sel-wrap">
+      <select id="cameraPreset" onchange="loadPreset()">
+        <option value="custom">— Camera personalizzata —</option>
+        <option value="ff" selected>FF 24×36 mm — 42 MPx</option>
+        <option value="apsh">APS-H 27.7×17.9 mm — 25.7 MPx</option>
+        <option value="apsc">APS-C 16×24 mm — 19.7 MPx</option>
+        <option value="m43">4/3 · 13×17.31 mm — 15.8 MPx</option>
+        <option value="one_dji">1″ DJI Phantom — 19.96 MPx</option>
+        <option value="one_soda">1″ SODA / e-bee plus — 20 MPx</option>
+        <option value="s110">1/1.7″ Canon S110 (e-bee) — 12.1 MPx</option>
+        <option value="mavic">1/2.3″ Mavic Pro / Action Cam — 12 MPx</option>
+        <option value="phone">Cellulare 1/3″ — 8 MPx</option>
+        <option value="zeiss">ZEISS DMC — 106.2 MPx (grande formato)</option>
+        <option value="leica_s3">Leica S3 — 64 MPx</option>
+        <option value="fuji">Fujifilm GFX100S — 102 MPx</option>
+        <option value="hass_x1d">Hasselblad X1D — 50 MPx</option>
+        <option value="hass_h6d">Hasselblad H6D-100c — 100.9 MPx</option>
+        <option value="phase">Phase One iXM-RS150F — 151.3 MPx</option>
+        <option value="flyr">FLYR 8580 (termocamera) — 1.31 MPx</option>
+      </select>
+    </div>
+
+    <div class="panel-title">Parametri camera</div>
+    <div class="inp-grid">
+      <div><label class="flabel">Lato <i>a</i> <span class="u">(mm)</span></label>
+        <input class="inp" type="number" id="inp_a" step="0.01" value="24" oninput="setCustom();compute()"></div>
+      <div><label class="flabel">Lato <i>b</i> <span class="u">(mm)</span></label>
+        <input class="inp" type="number" id="inp_b" step="0.01" value="35.96" oninput="setCustom();compute()"></div>
+      <div><label class="flabel">Risoluzione <span class="u">(MPx)</span></label>
+        <input class="inp" type="number" id="inp_mpx" step="0.1" value="42" oninput="setCustom();compute()"></div>
+      <div><label class="flabel">Focale <i>f</i> <span class="u">(mm)</span></label>
+        <input class="inp" type="number" id="inp_f" step="0.1" value="35" oninput="setCustom();compute()"></div>
+    </div>
+    <canvas id="sensorDiagram" height="95"></canvas>
+
+    <div class="panel-title">Parametri di presa</div>
+    <div style="margin-bottom:11px">
+      <div class="alt-hdr">
+        <label class="flabel">Quota di volo <i>H</i></label>
+        <div class="alt-val" id="altDisplay">300 <span>m</span></div>
+      </div>
+      <input type="range" id="altSlider" min="10" max="8000" step="10" value="300" oninput="syncAlt(this.value);compute()">
+      <div class="rng-lbl"><span>10 m</span><span>8 000 m</span></div>
+      <div style="margin-top:7px">
+        <label class="flabel">Valore esatto <span class="u">(m)</span></label>
+        <input class="inp" type="number" id="inp_h" value="300" min="1" step="1" oninput="syncAltInput(this.value);compute()">
+      </div>
+    </div>
+
+    <div class="panel-title">Ricoprimento</div>
+    <div class="ov-row">
+      <div class="ov-field"><label class="flabel">Avanz. <i>p</i> <span class="u">(%)</span></label>
+        <input class="inp" type="number" id="inp_p" value="60" min="0" max="99" oninput="compute()"></div>
+      <div class="ov-field"><label class="flabel">Lat. <i>q</i> <span class="u">(%)</span></label>
+        <input class="inp" type="number" id="inp_q" value="60" min="0" max="99" oninput="compute()"></div>
+    </div>
+    <div class="ov-disp"><span>Base (dir. volo)</span><strong id="disp_base">—</strong></div>
+    <div class="ov-disp" style="margin-top:4px"><span>Interasse strisciate</span><strong id="disp_interasse">—</strong></div>
+  </aside>
+
+  <main class="right-panel">
+    <!-- TAB PARAMETRI -->
+    <div id="tab-parametri" class="tab-content active">
+      <div class="sec-hdg">Parametri della camera</div>
+      <div class="rgrid" id="grid-camera"></div>
+      <div class="sec-hdg">Abbracciamento a terra</div>
+      <div class="rgrid" id="grid-scale"></div>
+      <div class="sec-hdg">Potere risolutivo</div>
+      <div class="rgrid" id="grid-res"></div>
+    </div>
+
+    <!-- TAB ANGOLI -->
+    <div id="tab-angoli" class="tab-content">
+      <div class="sec-hdg">Angoli di campo</div>
+      <div class="rgrid" id="grid-angles"></div>
+      <div class="sec-hdg">Footprint a terra — ricoprimento 3×3</div>
+      <div class="cv-wrap">
+        <div class="cv-title">Impronta proiettata al suolo</div>
+        <canvas id="footprintCanvas" width="680" height="300"></canvas>
+        <div id="footprintLegend" style="margin-top:9px;font-size:12px;color:var(--slate);display:flex;gap:16px;flex-wrap:wrap"></div>
+      </div>
+      <div class="sec-hdg">Schema geometrico — camera nadirale</div>
+      <div class="cv-wrap">
+        <div class="cv-title">Relazione fotocamera–quota–impronta</div>
+        <canvas id="angleCanvas" width="680" height="210"></canvas>
+      </div>
+    </div>
+
+    <!-- TAB FORMULE -->
+    <div id="tab-formule" class="tab-content">
+      <div class="ibox blue">
+        <span style="font-size:14px">ℹ</span>
+        <div>Tutte le relazioni matematiche, con formula in notazione matematica e valore numerico aggiornato in tempo reale. Righe <span style="color:var(--amber);font-weight:700">arancioni</span> = parametri di ingresso.</div>
+      </div>
+      <table class="ftable">
+        <thead><tr>
+          <th style="width:215px">Parametro</th>
+          <th>Formula</th>
+          <th style="width:155px">Valore calcolato</th>
+        </tr></thead>
+        <tbody id="formulaTbody"></tbody>
+      </table>
+    </div>
+
+    <!-- TAB CONFRONTO -->
+    <div id="tab-confronto" class="tab-content">
+      <div class="ibox orange">
+        <span>⚠</span>
+        <div>Confronto a parità di quota <strong id="compare-h-label">H = 300 m</strong>. Riga evidenziata = camera selezionata.</div>
+      </div>
+      <div class="cmp-wrap">
+        <table class="cmptable">
+          <thead><tr>
+            <th>Camera</th><th>MPx</th><th>a×b (mm)</th><th>f (mm)</th>
+            <th>d_p (µm)</th><th>f_eq (mm)</th><th>GSD (mm)</th>
+            <th>L_a (m)</th><th>L_b (m)</th>
+            <th>α_a (gon)</th><th>α_b (gon)</th><th>γ (mgon)</th><th>DPI</th>
+          </tr></thead>
+          <tbody id="compareTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3D ISO -->
+    <div id="tab-iso3d" class="tab-content">
+      <div style="position:relative;">
+        <canvas id="isoCanvas" width="820" height="510"
+          style="display:block;width:100%;border-radius:12px;border:1.5px solid var(--border);background:#7fb8d8;"></canvas>
+        <div id="iso3dInfo" style="
+          position:absolute; top:12px; left:12px;
+          background:rgba(18,40,72,0.82); color:#e8eef8;
+          border-radius:8px; padding:10px 14px; font-size:11.5px;
+          border:1px solid rgba(255,255,255,0.1); min-width:180px;
+          backdrop-filter:blur(4px);"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer class="oge-footer">
+  Sviluppato nell'ambito dell'<b>Open Geomatics Education Group</b> · Autore: V. Di Pietra (Politecnico di Torino) · Versione 1.0, 2026<br>
+  Contenuti <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · Codice MIT · Formule renderizzate con KaTeX (MIT) ·
+  <a href="https://github.com/OpenGeomaticsEducation-PoliTO/OpenGeomaticsEducation-PoliTO.github.io/issues/new/choose">Segnala un errore</a>
+</footer>
+<style>.oge-footer{padding:14px 24px;font-size:12px;color:var(--slate-light);border-top:1px solid var(--border);background:var(--card-bg)}.oge-footer a{color:var(--navy-light)}@media (max-width:860px){.main-layout{grid-template-columns:1fr}}</style>
+
+<!-- Global tooltip -->
+<div id="tt"><div class="tt-title" id="tt-title"></div><div class="tt-body" id="tt-body"></div><div class="tt-formula" id="tt-formula" style="display:none"></div></div>
+
+<script>
+// ─── KaTeX helper ─────────────────────────────────────────────
+function M(latex) {
+  try { return katex.renderToString(latex,{throwOnError:false,displayMode:false}); }
+  catch(e){ return `<code>${latex}</code>`; }
+}
+
+// ─── PRESETS ──────────────────────────────────────────────────
+const PRESETS = {
+  ff:       {a:24,    b:35.96,  mpx:42,      f:35,   lbl:'FF 24×36'},
+  apsh:     {a:17.9,  b:27.7,   mpx:25.7,    f:15,   lbl:'APS-H'},
+  apsc:     {a:16,    b:24,     mpx:19.7,    f:35,   lbl:'APS-C'},
+  m43:      {a:13,    b:17.316, mpx:15.833,  f:60,   lbl:'4/3'},
+  one_dji:  {a:8.8,   b:13.2,   mpx:19.962,  f:8.8,  lbl:'1″ DJI Phantom'},
+  one_soda: {a:8.8,   b:13.2,   mpx:20,      f:10,   lbl:'1″ SODA e-bee'},
+  s110:     {a:5.64,  b:7.53,   mpx:12.1,    f:5.2,  lbl:'1/1.7″ Canon S110'},
+  mavic:    {a:4.628, b:6.17,   mpx:12,      f:4,    lbl:'1/2.3″ Mavic Pro'},
+  phone:    {a:3.6,   b:4.87,   mpx:8,       f:3.362,lbl:'Cellulare 1/3″'},
+  zeiss:    {a:92.16, b:165.888,mpx:106.168, f:120,  lbl:'ZEISS DMC'},
+  leica_s3: {a:30,    b:45,     mpx:64,      f:50,   lbl:'Leica S3'},
+  fuji:     {a:32.9,  b:43.8,   mpx:102,     f:50,   lbl:'Fujifilm GFX100S'},
+  hass_x1d: {a:32.9,  b:43.8,   mpx:50,      f:50,   lbl:'Hasselblad X1D'},
+  hass_h6d: {a:40,    b:53.4,   mpx:100.92,  f:50,   lbl:'Hasselblad H6D-100c'},
+  phase:    {a:40,    b:53.4,   mpx:151.3,   f:50,   lbl:'Phase One iXM-RS150F'},
+  flyr:     {a:12.288,b:15.36,  mpx:1.31072, f:50,   lbl:'FLYR 8580 (termocamera)'},
+};
+const FF_diag = Math.sqrt(24**2+35.96**2), FF_area = 24*35.96;
+
+// ─── COMPUTE ─────────────────────────────────────────────────
+let R={};
+function compute(){
+  const a=+document.getElementById('inp_a').value||1;
+  const b=+document.getElementById('inp_b').value||1;
+  const mpx=+document.getElementById('inp_mpx').value||1;
+  const f=+document.getElementById('inp_f').value||1;
+  const H=+document.getElementById('inp_h').value||1;
+  const p=(+document.getElementById('inp_p').value||60)/100;
+  const q=(+document.getElementById('inp_q').value||60)/100;
+
+  const diag=Math.sqrt(a**2+b**2), area=a*b;
+  const cf=FF_diag/diag, f_eq=f*cf;
+  const dp=Math.sqrt(a*b/(mpx*1e6)), dp_um=dp*1000;
+  const aPx=Math.sqrt(mpx*1e6*a/b), bPx=Math.sqrt(mpx*1e6*b/a), fPx=f/dp;
+  const sc=H*1000/f, GSD=dp*sc, fa=a*H/f, fb=b*H/f;
+  const aa=(a/f)*(200/Math.PI), ab=(b/f)*(200/Math.PI), ad=(diag/f)*(200/Math.PI);
+  const aa_ex=2*Math.atan(a/(2*f))*200/Math.PI, ab_ex=2*Math.atan(b/(2*f))*200/Math.PI;
+  const gm=(dp/f)*(200000/Math.PI), rho=GSD*1000/H, dpi=25.4/dp;
+  const base=fa*(1-p), inter=fb*(1-q);
+
+  R={a,b,mpx,f,H,p,q,diag,area,area_ratio:area/FF_area,cf,f_eq,
+     dp,dp_um,aPx,bPx,fPx,sc,GSD,fa,fb,aa,ab,ad,aa_ex,ab_ex,
+     gm,rho,dpi,base,inter};
+
+  renderAll();
+}
+
+// ─── FORMAT ──────────────────────────────────────────────────
+const V=(v,d=3)=>isNaN(v)?'—':(+v).toFixed(d);
+const Vk=v=>v>=1e6?(v/1e6).toFixed(2)+'M':v>=1e3?(v/1e3).toFixed(1)+'k':(+v).toFixed(0);
+
+// ─── TOOLTIP DESCRIPTIONS ─────────────────────────────────────
+const TIPS = {
+  'Dimensione pixel d_p': {
+    body: 'Grandezza fisica di ciascun fotodetettore sul sensore. Pixel più grandi catturano più luce (migliore SNR in condizioni di scarsa illuminazione) ma riducono la risoluzione spaziale. Per DSLR full frame: 4–8 µm. Per smartphone: 0.8–2 µm. Per camere metriche aeree: 6–12 µm.',
+    formula: 'd_p = \\sqrt{a \\cdot b \\;/\\; (N_{px} \\cdot 10^6)}',
+    tag: 'Parametro intrinseco'
+  },
+  'Pixel lungo a': {
+    body: 'Numero di pixel disposti lungo il lato corto del sensore. Derivato dalla risoluzione totale e dal rapporto di formato b/a. Determina con d_p la dimensione fisica del lato a.',
+    formula: 'N_a = \\sqrt{N_{px} \\cdot 10^6 \\cdot a/b}',
+    tag: 'Geometria sensore'
+  },
+  'Pixel lungo b': {
+    body: 'Numero di pixel lungo il lato lungo. Con N_a si ha N_a × N_b = N_px (megapixel totali). Il prodotto N_a · d_p = a e N_b · d_p = b deve essere verificato per consistenza.',
+    formula: 'N_b = \\sqrt{N_{px} \\cdot 10^6 \\cdot b/a}',
+    tag: 'Geometria sensore'
+  },
+  'Focale in pixel': {
+    body: 'La focale espressa in pixel è il parametro chiave della geometria prospettica digitale. Coincide con il rapporto H / GSD_m: indica quanti pixel campionano un metro al suolo a una data quota. Usata nella matrice di calibrazione intrinseca della camera.',
+    formula: 'f_{px} = f / d_p \\;=\\; H / \\mathrm{GSD}_{[m]}',
+    tag: 'Calibrazione camera'
+  },
+  'Diagonale sensore': {
+    body: 'La diagonale è la misura standard per classificare i formati fotografici (es. Full Frame = 43.3 mm, 1" = 15.9 mm, 4/3 = 21.6 mm). Determina il fattore di crop rispetto al formato 24×36 mm di riferimento.',
+    formula: '\\delta = \\sqrt{a^2 + b^2}',
+    tag: 'Classificazione formato'
+  },
+  'Area sensore': {
+    body: "L'area del sensore è proporzionale alla quantità di luce raccolta a parità di ottica. Raddoppiare l'area migliora il rapporto segnale/rumore di circa √2 ≈ 1.4 stop. Il rapporto con il FF indica quanto il sensore sia penalizzato rispetto al Full Frame.",
+    formula: 'A = a \\cdot b',
+    tag: 'Capacità radiometrica'
+  },
+  'Fattore di crop': {
+    body: "Il fattore di crop (o moltiplicatore focale) indica quante volte il sensore è più piccolo della diagonale del FF. Un obiettivo da 50 mm su APS-C (CF≈1.5) offre lo stesso angolo di campo di un 75 mm su FF. CF > 1 → sensore più piccolo del FF. CF < 1 → sensore più grande (medio/grande formato).",
+    formula: 'CF = \\delta_{FF} / \\delta',
+    tag: 'Confronto formati'
+  },
+  'Focale equiv. 24×36': {
+    body: 'La focale equivalente normalizza l\'angolo di campo rispetto al formato Full Frame, consentendo il confronto diretto tra obiettivi montati su sensori diversi. Standard universale nella fotografia commerciale.',
+    formula: 'f_{eq} = f \\cdot CF',
+    tag: 'Confronto obiettivi'
+  },
+  'Scala media': {
+    body: "La scala di volo è il rapporto tra una lunghezza nell'immagine e la corrispondente lunghezza a terra. 1:10 000 → 1 mm = 10 m a terra. Scala lineare (non areale): per ottenere la scala areale si eleva al quadrato. Dipende linearmente dalla quota H e inversamente dalla focale f.",
+    formula: 'm_s = H_{[m]} \\cdot 1000 \\;/\\; f_{[mm]}',
+    tag: 'Scala fotografica'
+  },
+  'GSD': {
+    body: "Il Ground Sampling Distance è il parametro qualitativo fondamentale di un rilievo aereo: la dimensione di un pixel proiettato al suolo. Due oggetti distanti meno del GSD non sono distinguibili. GSD = 5 cm è tipico per rilievi catastali; GSD = 20–50 cm per cartografia 1:5000. Scala linearmente con H e inversamente con f.",
+    formula: '\\mathrm{GSD} = d_p \\cdot H \\cdot 1000 / f',
+    tag: 'Qualità del rilievo'
+  },
+  'Impronta lato a': {
+    body: "Dimensione a terra dell'immagine lungo il lato corto del sensore (generalmente nella direzione del volo). Determina, insieme al ricoprimento in avanzamento p, la base di volo B = L_a · (1–p).",
+    formula: 'L_a = a \\cdot H / f',
+    tag: 'Pianificazione volo'
+  },
+  'Impronta lato b': {
+    body: "Dimensione a terra lungo il lato lungo del sensore (generalmente trasversale al volo). Determina, insieme al ricoprimento laterale q, l'interasse tra strisciate I = L_b · (1–q).",
+    formula: 'L_b = b \\cdot H / f',
+    tag: 'Pianificazione volo'
+  },
+  'Base di volo': {
+    body: "La base di volo è la distanza percorsa tra due prese consecutive nella stessa strisciata. Base piccola → angolo di parallasse piccolo → scarsa precisione altimetrica (σ_Z ≈ GSD · H/B). Ricoprimento tipico: p = 60–80% per fotogrammetria stereo, p ≥ 80% per SfM/dense matching.",
+    formula: 'B = L_a \\cdot (1-p)',
+    tag: 'Stereo e SfM'
+  },
+  'Interasse strisciate': {
+    body: "Distanza laterale tra le proiezioni a terra di strisciate adiacenti. Insieme alla base, determina il numero totale di fotogrammi e il costo del rilievo. Ricoprimento laterale tipico: q = 30–60%. Per rilievi UAV con SfM si usa spesso q = 60–80%.",
+    formula: 'I = L_b \\cdot (1-q)',
+    tag: 'Pianificazione volo'
+  },
+  'Risoluzione angolare γ': {
+    body: "La risoluzione angolare è l'angolo sotteso da un singolo pixel visto dal centro di proiezione. È il potere risolutivo intrinseco della camera, indipendente dalla quota di volo. Valori tipici: 3–8 mgon per DSLR/mirrorless; 15–30 mgon per smartphone. Equivalente al limite di diffrazione in ottica.",
+    formula: '\\gamma = (d_p / f) \\cdot 200\\,000 / \\pi',
+    tag: 'Potere risolutivo'
+  },
+  'DPI acquisizione': {
+    body: "I DPI (Dots Per Inch) indicano la densità di campionamento del sensore per unità di lunghezza lineare. In fotogrammetria digitale le camere di alta qualità hanno 5 000–15 000 DPI. Per scansioni di originali cartacei il riferimento è 600–1 200 DPI.",
+    formula: '\\mathrm{DPI} = 25.4 / d_p',
+    tag: 'Densità campionamento'
+  },
+  'Rapporto GSD/H': {
+    body: "Esprime il GSD in micrometri per metro di quota. È un parametro intrinseco della camera (non dipende da H): a quota 1 m il GSD vale ρ µm. Equivale alla risoluzione angolare γ espressa in µrad/px. Utile per confrontare rapidamente camere diverse: ρ più basso = camera più performante.",
+    formula: '\\rho = \\mathrm{GSD}_{[\\mu m]} / H_{[m]} = d_p^{[\\mu m]} \\cdot 1000 / f_{[mm]}',
+    tag: 'Parametro intrinseco'
+  },
+  'Angolo di campo α_a': {
+    body: "Angolo di campo lungo il lato corto del sensore (verticale se il sensore è in orizzontale). Formula approssimata (piccoli angoli): accuratezza < 0.5% per α < 50 gon. Per α > 80 gon usare la formula esatta. Grandangolare: α > 75 gon; normale: α ≈ 45 gon; teleobiettivo: α < 25 gon.",
+    formula: '\\alpha_a = (a/f) \\cdot 200/\\pi \\approx 2\\arctan(a/2f)\\cdot 200/\\pi',
+    tag: 'Angolo di campo'
+  },
+  'Angolo di campo α_b': {
+    body: "Angolo di campo lungo il lato lungo del sensore (orizzontale se il sensore è in posizione paesaggio). Determina la copertura angolare nel senso trasversale al volo. Obiettivi ultra-grandangolari arrivano a α_b > 120 gon.",
+    formula: '\\alpha_b = (b/f) \\cdot 200/\\pi \\approx 2\\arctan(b/2f)\\cdot 200/\\pi',
+    tag: 'Angolo di campo'
+  },
+  'Angolo sulla diagonale': {
+    body: "Angolo di campo massimo, misurato sulla diagonale del sensore. Classifica le ottiche: fisheye > 180 gon, ultra-grandangolare > 130 gon, grandangolare 90–130 gon, normale 40–90 gon, teleobiettivo < 40 gon. Determina la profondità di campo minima e la distorsione radiale.",
+    formula: '\\alpha_\\delta = (\\delta / f) \\cdot 200/\\pi',
+    tag: 'Classificazione ottica'
+  },
+  'Rapporto di formato': {
+    body: "Il rapporto di formato (aspect ratio) descrive le proporzioni del sensore. 3:2 (r ≈ 1.500) → formato classico 35mm e Full Frame. 4:3 (r ≈ 1.333) → Micro Four Thirds, compatte. 1:1 (r = 1.000) → formato quadrato. 16:9 (r ≈ 1.778) → video. Il valore influenza la forma dell'impronta e la strategia di volo.",
+    formula: 'r = b / a',
+    tag: 'Proporzioni sensore'
+  },
+};
+
+// ─── CARD ────────────────────────────────────────────────────
+function card(name,val,unit,latex,desc,note,sec){
+  const icons={camera:'📷',scale:'📏',angle:'📐',res:'🔬'};
+  const hasTip = !!TIPS[name];
+  return `<div class="pcard sec-${sec}"${hasTip?` data-tip="${name}"`:''}
+    onmouseenter="tipShow(event,'${name.replace(/'/g,"\\'")}',this)"
+    onmouseleave="tipHide()"
+    onmousemove="tipMove(event)">
+    <div class="pcard-hdr"><div class="picon">${icons[sec]}</div><div class="pname">${name}</div></div>
+    <div class="pbody">
+      <div class="pval">${val}<span class="ut">${unit}</span></div>
+      <div class="formula-box">${M(latex)}</div>
+      ${desc?`<div class="pdesc">${desc}</div>`:''}
+      ${note?`<div class="pnote">${note}</div>`:''}
+    </div></div>`;
+}
+
+// ─── RENDER ALL ──────────────────────────────────────────────
+function renderAll(){
+  const r=R;
+
+  // Camera cards
+  document.getElementById('grid-camera').innerHTML=[
+    card('Dimensione pixel d_p', V(r.dp_um,3),'µm',
+      `d_p = \\sqrt{\\dfrac{a \\cdot b}{N_{\\!px} \\cdot 10^6}}`,
+      'Lato del pixel fisico sul sensore','= '+V(r.dp,6)+' mm','camera'),
+    card('Pixel lungo a', Vk(r.aPx),'px',
+      `N_a = \\sqrt{N_{\\!px}\\cdot 10^6 \\cdot \\dfrac{a}{b}}`,'','','camera'),
+    card('Pixel lungo b', Vk(r.bPx),'px',
+      `N_b = \\sqrt{N_{\\!px}\\cdot 10^6 \\cdot \\dfrac{b}{a}}`,'','','camera'),
+    card('Focale in pixel', V(r.fPx,1),'px',
+      `f_{px} = \\dfrac{f}{d_p}`,'Distanza focale espressa in numero di pixel','','camera'),
+    card('Diagonale sensore', V(r.diag,3),'mm',
+      `\\delta = \\sqrt{a^2 + b^2}`,'','','camera'),
+    card('Area sensore', V(r.area,2),'mm²',
+      `A = a \\cdot b`,`Rapporto con FF 24×36: ${V(r.area_ratio,4)}×`,'','camera'),
+    card('Fattore di crop', V(r.cf,4),'×',
+      `CF = \\dfrac{\\delta_{\\!FF}}{\\delta}`,`Dove δ_FF = ${V(FF_diag,3)} mm`,'','camera'),
+    card('Focale equiv. 24×36', V(r.f_eq,2),'mm',
+      `f_{\\!eq} = f \\cdot CF`,'Lunghezza focale equivalente al Full Frame','','camera'),
+  ].join('');
+
+  // Scale cards
+  document.getElementById('grid-scale').innerHTML=[
+    card('Scala media', '1 : '+V(r.sc,0),'',
+      `m_s = \\dfrac{H \\cdot 1000}{f}`,'Denominatore della scala (H in m, f in mm)','','scale'),
+    card('GSD', V(r.GSD,2),'mm',
+      `\\mathrm{GSD} = d_p \\cdot m_s = \\dfrac{d_p \\cdot H \\cdot 1000}{f}`,
+      `≈ ${V(r.GSD/10,2)} cm al suolo`,'','scale'),
+    card('Impronta lato a', V(r.fa,2),'m',
+      `L_a = \\dfrac{a \\cdot H}{f}`,'Copertura a terra lungo il lato corto','','scale'),
+    card('Impronta lato b', V(r.fb,2),'m',
+      `L_b = \\dfrac{b \\cdot H}{f}`,'Copertura a terra lungo il lato lungo','','scale'),
+    card('Base di volo', V(r.base,2),'m',
+      `B = L_a \\cdot (1-p)`,`p = ${(r.p*100).toFixed(0)}%`,'','scale'),
+    card('Interasse strisciate', V(r.inter,2),'m',
+      `I = L_b \\cdot (1-q)`,`q = ${(r.q*100).toFixed(0)}%`,'','scale'),
+  ].join('');
+
+  // Res cards
+  document.getElementById('grid-res').innerHTML=[
+    card('Risoluzione angolare γ', V(r.gm,4),'mgon',
+      `\\gamma = \\dfrac{d_p}{f} \\cdot \\dfrac{200\\,000}{\\pi}`,
+      `= ${V(r.gm/200000*Math.PI*1000,5)} mrad / px`,'','res'),
+    card('DPI acquisizione', V(r.dpi,1),'DPI',
+      `\\mathrm{DPI} = \\dfrac{25.4}{d_p}`,'Densità per pollice lineare sul sensore','','res'),
+    card('Rapporto GSD/H', V(r.rho,4),'µm/m',
+      `\\rho = \\dfrac{\\mathrm{GSD}_{[\\mathrm{mm}]}\\cdot 1000}{H_{[\\mathrm{m}]}}`,
+      'GSD in micrometri per metro di quota','','res'),
+  ].join('');
+
+  // Angle cards
+  document.getElementById('grid-angles').innerHTML=[
+    card('Angolo di campo α_a', V(r.aa,3),'gon',
+      `\\alpha_a = \\frac{a}{f} \\cdot \\frac{200}{\\pi}`,
+      `Formula esatta 2·arctan(a/2f) = ${V(r.aa_ex,3)} gon`,'','angle'),
+    card('Angolo di campo α_b', V(r.ab,3),'gon',
+      `\\alpha_b = \\frac{b}{f} \\cdot \\frac{200}{\\pi}`,
+      `Formula esatta 2·arctan(b/2f) = ${V(r.ab_ex,3)} gon`,'','angle'),
+    card('Angolo sulla diagonale', V(r.ad,3),'gon',
+      `\\alpha_\\delta = \\frac{\\delta}{f} \\cdot \\frac{200}{\\pi}`,
+      'Angolo di campo pieno sulla diagonale','','angle'),
+    card('Rapporto di formato', V(r.b/r.a,4),'b/a',
+      `r = \\dfrac{b}{a}`,
+      '3:2 → r≈1.500 · 4:3 → r≈1.333','','angle'),
+  ].join('');
+
+  // Formula table
+  const inp=(lbl,v)=>`<tr class="irow"><td>${lbl}<span class="ibadge">input</span></td><td class="mc">—</td><td>${v}</td></tr>`;
+  const row=(lbl,lat,v)=>`<tr><td>${lbl}</td><td class="mc">${M(lat)}</td><td>${v}</td></tr>`;
+  document.getElementById('formulaTbody').innerHTML=[
+    inp('Lato <i>a</i> sensore', V(r.a,4)+' mm'),
+    inp('Lato <i>b</i> sensore', V(r.b,4)+' mm'),
+    inp('Risoluzione N<sub>px</sub>', V(r.mpx,3)+' MPx'),
+    inp('Focale <i>f</i>', V(r.f,3)+' mm'),
+    inp('Quota di volo H', V(r.H,1)+' m'),
+    inp('Avanzamento p', (r.p*100).toFixed(0)+' %'),
+    inp('Laterale q', (r.q*100).toFixed(0)+' %'),
+    row('Rapporto di formato','r = b/a', V(r.b/r.a,4)),
+    row('Diagonale sensore','\\delta = \\sqrt{a^2+b^2}', V(r.diag,4)+' mm'),
+    row('Area sensore','A = a\\cdot b', V(r.area,4)+' mm²'),
+    row('Rapporto area / FF','A_{ratio} = A/A_{FF}', V(r.area_ratio,5)),
+    row('Fattore di crop','CF = \\delta_{FF}/\\delta', V(r.cf,5)+'×'),
+    row('Focale equivalente 24×36','f_{eq} = f\\cdot CF', V(r.f_eq,3)+' mm'),
+    row('Dimensione pixel d_p','d_p = \\sqrt{\\dfrac{a\\cdot b}{N_{px}\\cdot 10^6}}', V(r.dp_um,4)+' µm'),
+    row('Pixel lungo a','N_a = \\sqrt{N_{px}\\cdot 10^6\\cdot a/b}', Vk(r.aPx)+' px'),
+    row('Pixel lungo b','N_b = \\sqrt{N_{px}\\cdot 10^6\\cdot b/a}', Vk(r.bPx)+' px'),
+    row('Focale in pixel','f_{px} = f/d_p', V(r.fPx,2)+' px'),
+    row('Scala media','m_s = H\\cdot 1000/f', '1 : '+V(r.sc,0)),
+    row('GSD','\\mathrm{GSD} = d_p\\cdot m_s', V(r.GSD,3)+' mm'),
+    row('Impronta lato a','L_a = a\\cdot H/f', V(r.fa,3)+' m'),
+    row('Impronta lato b','L_b = b\\cdot H/f', V(r.fb,3)+' m'),
+    row('Base di volo','B = L_a\\cdot(1-p)', V(r.base,3)+' m'),
+    row('Interasse strisciate','I = L_b\\cdot(1-q)', V(r.inter,3)+' m'),
+    row('Angolo campo α_a (approx)','\\alpha_a = \\dfrac{a}{f}\\cdot\\dfrac{200}{\\pi}', V(r.aa,4)+' gon'),
+    row('Angolo campo α_a (esatto)','\\alpha_a^* = 2\\arctan\\!\\left(\\dfrac{a}{2f}\\right)\\!\\cdot\\dfrac{200}{\\pi}', V(r.aa_ex,4)+' gon'),
+    row('Angolo campo α_b (approx)','\\alpha_b = \\dfrac{b}{f}\\cdot\\dfrac{200}{\\pi}', V(r.ab,4)+' gon'),
+    row('Angolo campo α_b (esatto)','\\alpha_b^* = 2\\arctan\\!\\left(\\dfrac{b}{2f}\\right)\\!\\cdot\\dfrac{200}{\\pi}', V(r.ab_ex,4)+' gon'),
+    row('Risoluzione angolare γ','\\gamma = \\dfrac{d_p}{f}\\cdot\\dfrac{200\\,000}{\\pi}', V(r.gm,5)+' mgon'),
+    row('Rapporto GSD/H','\\rho = \\dfrac{\\mathrm{GSD}_{[mm]}\\cdot 1000}{H_{[m]}}', V(r.rho,4)+' µm/m'),
+    row('DPI acquisizione','\\mathrm{DPI} = 25.4/d_p', V(r.dpi,2)+' DPI'),
+  ].join('');
+
+  // Compare
+  document.getElementById('compare-h-label').textContent=`H = ${r.H} m`;
+  const sel=document.getElementById('cameraPreset').value;
+  const cmp=k=>{const c=PRESETS[k],d=c;
+    const dp=Math.sqrt(d.a*d.b/(d.mpx*1e6));
+    const dg=Math.sqrt(d.a**2+d.b**2);
+    return{dp_um:dp*1000,f_eq:d.f*(FF_diag/dg),GSD:dp*(r.H*1000/d.f),
+           fa:d.a*r.H/d.f,fb:d.b*r.H/d.f,aa:(d.a/d.f)*200/Math.PI,
+           ab:(d.b/d.f)*200/Math.PI,gm:(dp/d.f)*200000/Math.PI,dpi:25.4/dp};
+  };
+  const maxGSD=Math.max(...Object.keys(PRESETS).map(k=>cmp(k).GSD));
+  document.getElementById('compareTbody').innerHTML=Object.entries(PRESETS).map(([k,c])=>{
+    const v=cmp(k); const hl=k===sel;
+    const bar=`<span class="vbar" style="width:${Math.max(2,(v.GSD/maxGSD*50)).toFixed(0)}px"></span>`;
+    return`<tr class="${hl?'hl':''}">
+      <td>${c.lbl}${hl?` <span class="badge">✓</span>`:''}</td>
+      <td class="mono">${c.mpx.toFixed(1)}</td><td class="mono">${c.a}×${c.b}</td><td class="mono">${c.f}</td>
+      <td class="mono">${v.dp_um.toFixed(2)}</td><td class="mono">${v.f_eq.toFixed(1)}</td>
+      <td class="mono">${v.GSD.toFixed(2)}${bar}</td><td class="mono">${v.fa.toFixed(1)}</td>
+      <td class="mono">${v.fb.toFixed(1)}</td><td class="mono">${v.aa.toFixed(2)}</td>
+      <td class="mono">${v.ab.toFixed(2)}</td><td class="mono">${v.gm.toFixed(3)}</td>
+      <td class="mono">${v.dpi.toFixed(0)}</td></tr>`;
+  }).join('');
+
+  // Sensor diagram
+  const cv=document.getElementById('sensorDiagram');
+  const cw=cv.parentElement.clientWidth-32; cv.width=cw; cv.height=95;
+  const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cw,95);
+  const maxD=Math.max(r.a,r.b,24,35.96);
+  const sc2=Math.min(185,cw-88)/maxD;
+  const fox=(cw-35.96*sc2)/2,foy=(95-24*sc2)/2;
+  ctx.fillStyle='rgba(28,59,110,0.06)'; ctx.strokeStyle='rgba(28,59,110,0.2)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.rect(fox,foy,35.96*sc2,24*sc2); ctx.fill(); ctx.stroke();
+  const sx=(cw-r.b*sc2)/2,sy=(95-r.a*sc2)/2;
+  ctx.fillStyle='rgba(232,119,34,0.18)'; ctx.strokeStyle='#E87722'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.rect(sx,sy,r.b*sc2,r.a*sc2); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle='rgba(232,119,34,0.35)'; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+  ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx+r.b*sc2,sy+r.a*sc2); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#4a5568'; ctx.font='10px JetBrains Mono,monospace'; ctx.textAlign='center';
+  ctx.fillText(`b=${r.b.toFixed(1)}mm`,sx+r.b*sc2/2,sy+r.a*sc2+13);
+  ctx.save(); ctx.translate(sx-10,sy+r.a*sc2/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText(`a=${r.a.toFixed(1)}mm`,0,0); ctx.restore();
+  ctx.fillStyle='rgba(28,59,110,0.4)'; ctx.font='9px Outfit,sans-serif';
+  ctx.textAlign='left'; ctx.fillText('FF ref',fox+2,foy+10);
+
+  // Overlap display
+  document.getElementById('disp_base').textContent=r.base.toFixed(2)+' m';
+  document.getElementById('disp_interasse').textContent=r.inter.toFixed(2)+' m';
+  updateSlider();
+}
+
+// ─── CANVASES ─────────────────────────────────────────────────
+function renderFootprint(){
+  const cv=document.getElementById('footprintCanvas');
+  if(!cv.getContext)return;
+  const W=cv.width,Hc=cv.height,ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,W,Hc);
+  const{fa,fb,base,inter}=R;
+  const sc=Math.min((W-70)/Math.max(fa,fb,1)/1.9,(Hc-70)/Math.max(fa,fb,1)/1.9);
+  const fw=fb*sc,fh=fa*sc,cx=W/2,cy=Hc/2;
+  ctx.strokeStyle='#e0e8f4'; ctx.lineWidth=1;
+  for(let i=-4;i<=4;i++){ctx.beginPath();ctx.moveTo(cx+i*50,0);ctx.lineTo(cx+i*50,Hc);ctx.stroke();ctx.beginPath();ctx.moveTo(0,cy+i*50);ctx.lineTo(W,cy+i*50);ctx.stroke();}
+  for(let row=-1;row<=1;row++)for(let col=-1;col<=1;col++){
+    const bx=cx+col*base*sc-fw/2,by=cy+row*inter*sc-fh/2;
+    const c=(row===0&&col===0);
+    ctx.fillStyle=c?'rgba(232,119,34,0.22)':'rgba(28,59,110,0.07)';
+    ctx.strokeStyle=c?'#E87722':'rgba(28,59,110,0.3)';
+    ctx.lineWidth=c?2:1;
+    ctx.beginPath();ctx.rect(bx,by,fw,fh);ctx.fill();ctx.stroke();
+  }
+  ctx.strokeStyle='#1C3B6E';ctx.fillStyle='#1C3B6E';ctx.lineWidth=1.5;
+  const ay=cy-fh/2-22,ax1=cx-base*sc*0.85,ax2=cx+base*sc*0.85;
+  ctx.beginPath();ctx.moveTo(ax1,ay);ctx.lineTo(ax2,ay);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ax2-6,ay-4);ctx.lineTo(ax2,ay);ctx.lineTo(ax2-6,ay+4);ctx.stroke();
+  ctx.font='11px Outfit,sans-serif';ctx.textAlign='center';
+  ctx.fillText(`B = ${R.base.toFixed(1)} m`,cx,ay-5);
+  const ix=cx-fw/2-24,iy1=cy-inter*sc*0.85,iy2=cy+inter*sc*0.85;
+  ctx.beginPath();ctx.moveTo(ix,iy1);ctx.lineTo(ix,iy2);ctx.stroke();
+  ctx.save();ctx.translate(ix-5,cy);ctx.rotate(-Math.PI/2);
+  ctx.fillText(`I = ${R.inter.toFixed(1)} m`,0,0);ctx.restore();
+  ctx.fillStyle='#E87722';ctx.font='bold 11px Outfit,sans-serif';ctx.textAlign='center';
+  ctx.fillText(`${fb.toFixed(1)} × ${fa.toFixed(1)} m`,cx,cy+4);
+  document.getElementById('footprintLegend').innerHTML=`<span>🟧 Fotogramma centrale</span><span>p = <b>${(R.p*100).toFixed(0)}%</b></span><span>q = <b>${(R.q*100).toFixed(0)}%</b></span><span>B = <b>${R.base.toFixed(1)} m</b> · I = <b>${R.inter.toFixed(1)} m</b></span>`;
+}
+
+function renderAngleDiagram(){
+  const cv=document.getElementById('angleCanvas');
+  if(!cv.getContext)return;
+  const W=cv.width,Hc=cv.height,ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,W,Hc);
+  const{f,H,GSD,fa,fb}=R;
+  const camX=W/2,camY=30,groundY=Hc-30;
+  const halfA=Math.min(fa/2*(groundY-camY)/(H||1),W*0.36);
+  ctx.fillStyle='#1C3B6E';
+  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(camX-12,camY-16,24,14,3);else ctx.rect(camX-12,camY-16,24,14);ctx.fill();
+  ctx.fillStyle='#2a5298';ctx.beginPath();ctx.arc(camX,camY-4,4,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(28,59,110,0.2)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+  ctx.beginPath();ctx.moveTo(camX,camY);ctx.lineTo(camX,groundY);ctx.stroke();
+  ctx.setLineDash([]);
+  const gL=camX-halfA,gR=camX+halfA;
+  ctx.strokeStyle='rgba(232,119,34,0.6)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(camX,camY);ctx.lineTo(gL,groundY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(camX,camY);ctx.lineTo(gR,groundY);ctx.stroke();
+  ctx.fillStyle='rgba(232,119,34,0.1)';
+  ctx.beginPath();ctx.moveTo(camX,camY);ctx.lineTo(gL,groundY);ctx.lineTo(gR,groundY);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#2a5298';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(gL,groundY);ctx.lineTo(gR,groundY);ctx.stroke();
+  const ha=Math.atan((gR-camX)/(groundY-camY));
+  ctx.strokeStyle='#E87722';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(camX,camY,36,-Math.PI/2-ha,-Math.PI/2+ha);ctx.stroke();
+  ctx.fillStyle='#E87722';ctx.font='bold 11px Outfit,sans-serif';ctx.textAlign='center';
+  ctx.fillText(`α_a = ${V(R.aa,2)} gon`,camX,camY+55);
+  const hx=gL-22;
+  ctx.strokeStyle='#4a5568';ctx.fillStyle='#4a5568';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(hx,camY);ctx.lineTo(hx,groundY);ctx.stroke();
+  [[camY,1],[groundY,-1]].forEach(([y,d])=>{ctx.beginPath();ctx.moveTo(hx-4,y+d*6);ctx.lineTo(hx,y);ctx.lineTo(hx+4,y+d*6);ctx.stroke();});
+  ctx.font='11px Outfit,sans-serif';ctx.textAlign='center';
+  ctx.save();ctx.translate(hx-12,(camY+groundY)/2);ctx.rotate(-Math.PI/2);
+  ctx.fillText(`H = ${H} m`,0,0);ctx.restore();
+  ctx.fillStyle='#1C3B6E';ctx.font='11px JetBrains Mono,monospace';ctx.textAlign='center';
+  ctx.fillText(`L_a = ${fa.toFixed(1)} m`,camX,groundY+17);
+  ctx.fillStyle='rgba(28,59,110,0.5)';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='right';
+  ctx.fillText(`f = ${f} mm`,camX-2,camY+14);
+  const gsdPx=Math.min(GSD/1000*(groundY-camY)/(H||1)*100,halfA*0.4);
+  if(gsdPx>=1.5){
+    ctx.fillStyle='rgba(28,59,110,0.75)';ctx.fillRect(camX-gsdPx/2,groundY-5,Math.max(gsdPx,2),4);
+    ctx.font='9px JetBrains Mono,monospace';ctx.textAlign='center';ctx.fillStyle='rgba(28,59,110,0.7)';
+    ctx.fillText(`GSD=${GSD.toFixed(1)}mm`,camX,groundY-8);
+  }
+}
+
+// ─── UI ──────────────────────────────────────────────────────
+function loadPreset(){
+  const k=document.getElementById('cameraPreset').value; if(k==='custom')return;
+  const p=PRESETS[k];
+  document.getElementById('inp_a').value=p.a; document.getElementById('inp_b').value=p.b;
+  document.getElementById('inp_mpx').value=p.mpx; document.getElementById('inp_f').value=p.f;
+  compute();
+}
+function setCustom(){document.getElementById('cameraPreset').value='custom';}
+function syncAlt(v){document.getElementById('inp_h').value=v;document.getElementById('altDisplay').innerHTML=(+v).toLocaleString('it')+' <span>m</span>';}
+function syncAltInput(v){const c=Math.min(8000,Math.max(10,+v));document.getElementById('altSlider').value=c;document.getElementById('altDisplay').innerHTML=(+v).toLocaleString('it')+' <span>m</span>';}
+function updateSlider(){const sl=document.getElementById('altSlider');sl.style.setProperty('--pct',((sl.value-sl.min)/(sl.max-sl.min)*100).toFixed(1)+'%');}
+function showTab(id,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active'); btn.classList.add('active');
+  if(id==='angoli'){renderFootprint();renderAngleDiagram();}
+  if(id==='iso3d'){ISO.start(document.getElementById('isoCanvas'));}
+  else {ISO.stop();}
+}
+
+// ════════════════════════════════════════════════════════════
+// ISOMETRIC 3D FLIGHT PLAN RENDERER
+// ════════════════════════════════════════════════════════════
+const ISO = (() => {
+  let cv, ctx, animId=null;
+  const NF=4, NS=3;
+  const C30=Math.cos(Math.PI/6), S30=Math.sin(Math.PI/6);
+  let sc=100, ox=0, oy=0;
+
+  // ── Scene (normalized, La=1) ───────────────────────────
+  function sd() {
+    const r=R, La=r.fa, Lb=r.fb, B=r.base, I=r.inter;
+    const k=1/La;
+    return {
+      La:1, Lb:Lb*k, B:B*k, I:I*k,
+      Hd: Math.max(0.22, Math.min(1.85, r.H*k*0.55)),
+      p:r.p, q:r.q,
+      La_m:La, Lb_m:Lb, B_m:B, I_m:I, H_m:r.H, GSD:r.GSD
+    };
+  }
+
+  // ── Isometric projection ────────────────────────────────
+  function proj(wx,wy,wz){ return {x: ox+(wx-wy)*C30*sc, y: oy+(wx+wy)*S30*sc-wz*sc}; }
+
+  function setupProj(s) {
+    const W=cv.width, H=cv.height;
+    const {La,Lb,B,I,Hd}=s;
+    const wX=(NF-1)*B+La, wY=(NS-1)*I+Lb;
+    const sw=(wX+wY)*C30, sh=(wX+wY)*S30+Hd;
+    const mg=80;
+    sc=Math.min((W-mg*2)/sw,(H-mg*1.5)/sh)*0.86;
+    const right=(wX-wY)*C30*sc, bottom=(wX+wY)*S30*sc;
+    ox=W/2-right/2+wY*C30*sc*0.5;
+    oy=H*0.5-bottom/2+Hd*sc*0.45;
+  }
+
+  // ── Primitives ─────────────────────────────────────────
+  function quad(pts,fill,stroke,lw=1){
+    ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+    for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x,pts[i].y);
+    ctx.closePath();
+    if(fill){ctx.fillStyle=fill;ctx.fill();}
+    if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke();}
+  }
+
+  function seg(a,b,color,lw,dash=[]){
+    ctx.beginPath();ctx.setLineDash(dash);ctx.strokeStyle=color;ctx.lineWidth=lw;
+    ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.setLineDash([]);
+  }
+
+  function dimArrow(a,b,color,label,labelOff=0,lw=1.5){
+    seg(a,b,color,lw);
+    const dx=b.x-a.x,dy=b.y-a.y,len=Math.sqrt(dx*dx+dy*dy);
+    if(len<8) return;
+    const ux=dx/len,uy=dy/len,hs=7;
+    [a,b].forEach((pt,i)=>{
+      const s=i===0?1:-1;
+      ctx.beginPath();ctx.fillStyle=color;
+      ctx.moveTo(pt.x,pt.y);
+      ctx.lineTo(pt.x+s*ux*hs+uy*hs*0.45,pt.y+s*uy*hs-ux*hs*0.45);
+      ctx.lineTo(pt.x+s*ux*hs-uy*hs*0.45,pt.y+s*uy*hs+ux*hs*0.45);
+      ctx.fill();
+    });
+    if(label){
+      const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+      const nx=-uy,ny=ux; // normal
+      const off=labelOff||12;
+      ctx.fillStyle=color;ctx.font='bold 11px Outfit,sans-serif';ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      // halo
+      ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=3;
+      ctx.strokeText(label,mx+nx*off,my+ny*off);
+      ctx.fillText(label,mx+nx*off,my+ny*off);
+      ctx.textBaseline='alphabetic';
+    }
+  }
+
+  // ── Ground plane ───────────────────────────────────────
+  function drawGround(s){
+    const {La,Lb,B,I}=s, m=0.4;
+    const wX=(NF-1)*B+La, wY=(NS-1)*I+Lb;
+    const corners=[proj(-m,-m,0),proj(wX+m,-m,0),proj(wX+m,wY+m,0),proj(-m,wY+m,0)];
+    const g=ctx.createLinearGradient(corners[0].x,corners[0].y,corners[2].x,corners[2].y);
+    g.addColorStop(0,'#4a7240');g.addColorStop(1,'#2f5020');
+    quad(corners,g,'rgba(0,0,0,0.18)',1.5);
+    // Grid
+    const gs=La*0.5;
+    ctx.setLineDash([2,5]);ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=0.5;
+    for(let x=0;x<=wX+0.01;x+=gs){seg(proj(x,0,0),proj(x,wY,0),'rgba(255,255,255,0.07)',0.5,[2,5]);}
+    for(let y=0;y<=wY+0.01;y+=gs){seg(proj(0,y,0),proj(wX,y,0),'rgba(255,255,255,0.07)',0.5,[2,5]);}
+    ctx.setLineDash([]);
+  }
+
+  // ── Footprints & overlaps ──────────────────────────────
+  function drawFootprints(s){
+    const {La,Lb,B,I,p,q}=s;
+    const wX=(NF-1)*B+La;
+    const fwdOvColor='rgba(255,200,50,0.22)';
+    const latOvColor='rgba(80,160,240,0.20)';
+    const stripFills=['rgba(232,119,34,0.09)','rgba(28,59,110,0.11)','rgba(28,59,110,0.09)'];
+    const stripStrokes=['rgba(232,119,34,0.45)','rgba(28,59,110,0.4)','rgba(28,59,110,0.3)'];
+
+    for(let s_=NS-1;s_>=0;s_--){
+      const ys=s_*I;
+
+      // Lateral overlap zone between strip s_ and s_+1
+      if(s_<NS-1){
+        const yOvS=(s_+1)*I, yOvE=ys+Lb;
+        if(yOvE>yOvS) quad(
+          [proj(0,yOvS,0),proj(wX,yOvS,0),proj(wX,yOvE,0),proj(0,yOvE,0)],
+          latOvColor,null);
+      }
+
+      // Individual frames
+      for(let f=0;f<NF;f++){
+        const xf=f*B;
+        // Frame fill
+        quad([proj(xf,ys,0),proj(xf+La,ys,0),proj(xf+La,ys+Lb,0),proj(xf,ys+Lb,0)],
+             stripFills[s_],'rgba(28,59,110,0.3)',0.8);
+        // Forward overlap (this frame ∩ next frame)
+        if(f<NF-1){
+          const xOv=xf+B;
+          quad([proj(xOv,ys,0),proj(xf+La,ys,0),proj(xf+La,ys+Lb,0),proj(xOv,ys+Lb,0)],
+               fwdOvColor,null);
+        }
+        // Frame number label
+        const fc=proj(xf+La/2,ys+Lb/2,0);
+        ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='9px JetBrains Mono,monospace';
+        ctx.textAlign='center';ctx.fillText(`${s_+1}.${f+1}`,fc.x,fc.y+3);
+      }
+
+      // Strip outline
+      quad([proj(0,ys,0),proj(wX,ys,0),proj(wX,ys+Lb,0),proj(0,ys+Lb,0)],
+           null,stripStrokes[s_],s_===0?1.8:1);
+
+      // Flight path at strip midline
+      const ym=ys+Lb/2;
+      seg(proj(La/2,ym,0),proj((NF-1)*B+La/2,ym,0),
+          s_===0?'rgba(232,119,34,0.75)':'rgba(255,255,255,0.25)',s_===0?1.8:1,[6,4]);
+
+      // Waypoint dots
+      for(let f=0;f<NF;f++){
+        const wp=proj(f*B+La/2,ym,0);
+        ctx.beginPath();ctx.arc(wp.x,wp.y,s_===0?3.5:2,0,Math.PI*2);
+        ctx.fillStyle=s_===0?'rgba(232,119,34,0.9)':'rgba(255,255,255,0.3)';ctx.fill();
+      }
+    }
+  }
+
+  // ── Drone path ─────────────────────────────────────────
+  function dronePos(t,s){
+    const {La,Lb,B,I}=s;
+    const phases=[
+      {t0:0,   t1:.28, fn:u=>({x:La/2+(NF-1)*B*u,           y:Lb/2})},
+      {t0:.28, t1:.34, fn:u=>({x:(NF-1)*B+La/2,              y:Lb/2+I*u})},
+      {t0:.34, t1:.62, fn:u=>({x:(NF-1)*B+La/2-(NF-1)*B*u,  y:I+Lb/2})},
+      {t0:.62, t1:.68, fn:u=>({x:La/2,                       y:I+Lb/2+I*u})},
+      {t0:.68, t1:1.0, fn:u=>({x:La/2+(NF-1)*B*u,           y:2*I+Lb/2})},
+    ];
+    for(const ph of phases){
+      if(t<=ph.t1+0.001){
+        const u=Math.min(1,(t-ph.t0)/(ph.t1-ph.t0));
+        return ph.fn(u);
+      }
+    }
+    return {x:La/2,y:Lb/2};
+  }
+
+  // ── Camera frustum ─────────────────────────────────────
+  function drawFrustum(s,dx,dy){
+    const {La,Lb,Hd}=s;
+    const gCorners=[
+      [dx-La/2,dy-Lb/2],[dx+La/2,dy-Lb/2],
+      [dx+La/2,dy+Lb/2],[dx-La/2,dy+Lb/2]
+    ];
+    // Ground footprint of active frame
+    quad(gCorners.map(([x,y])=>proj(x,y,0)),
+         'rgba(232,119,34,0.18)','#E87722',2);
+
+    // Frustum rays
+    const dp=proj(dx,dy,Hd);
+    ctx.strokeStyle='rgba(232,119,34,0.38)';ctx.lineWidth=1;
+    for(const [cx_,cy_] of gCorners){
+      const gp=proj(cx_,cy_,0);
+      ctx.beginPath();ctx.moveTo(dp.x,dp.y);ctx.lineTo(gp.x,gp.y);ctx.stroke();
+    }
+
+    // Nadir line
+    seg(proj(dx,dy,0),dp,'rgba(255,255,255,0.38)',1,[4,4]);
+
+    // Ground shadow (circle under drone)
+    const sh=proj(dx,dy,0);
+    ctx.beginPath();ctx.ellipse(sh.x,sh.y,sc*0.04,sc*0.02,0,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,0,0,0.18)';ctx.fill();
+
+    // GSD label at footprint center
+    const fc=proj(dx,dy,0);
+    ctx.font='bold 9.5px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.strokeStyle='rgba(0,0,0,0.55)';ctx.lineWidth=3;
+    ctx.strokeText(`GSD ${s.GSD.toFixed(0)} mm`,fc.x,fc.y-6);
+    ctx.fillStyle='rgba(255,255,255,0.9)';ctx.fillText(`GSD ${s.GSD.toFixed(0)} mm`,fc.x,fc.y-6);
+  }
+
+  // ── Drone model ────────────────────────────────────────
+  function drawDrone(dx,dy,Hd,ts){
+    const p0=proj(dx,dy,Hd);
+    const sz=Math.max(14, sc*0.10);
+    const arm=sz*0.9, propR=sz*0.6;
+    const rot=ts*0.014;
+
+    // Arms (4 diagonal directions in isometric space)
+    const armDirs=[[C30*arm,S30*arm],[-C30*arm,S30*arm],
+                   [-C30*arm,-S30*arm],[C30*arm,-S30*arm]];
+    for(const [ax,ay] of armDirs){
+      // Arm tube
+      ctx.beginPath();ctx.strokeStyle='#b0b8c4';ctx.lineWidth=2.5;
+      ctx.moveTo(p0.x,p0.y);ctx.lineTo(p0.x+ax,p0.y+ay);ctx.stroke();
+      // Motor hub
+      ctx.beginPath();ctx.arc(p0.x+ax,p0.y+ay,3.5,0,Math.PI*2);
+      ctx.fillStyle='#666';ctx.fill();
+      // Propeller (ellipse, foreshortened)
+      ctx.save();ctx.translate(p0.x+ax,p0.y+ay);
+      ctx.beginPath();ctx.ellipse(0,0,propR,propR*0.28,rot,0,Math.PI*2);
+      ctx.fillStyle='rgba(170,185,200,0.38)';ctx.fill();
+      ctx.strokeStyle='rgba(140,155,170,0.7)';ctx.lineWidth=0.9;ctx.stroke();
+      // Propeller blade cross
+      ctx.beginPath();ctx.strokeStyle='rgba(120,140,160,0.5)';ctx.lineWidth=1.2;
+      const r2=propR*0.95;
+      ctx.moveTo(-r2*Math.cos(rot),-r2*Math.sin(rot)*0.28);
+      ctx.lineTo( r2*Math.cos(rot), r2*Math.sin(rot)*0.28);ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-r2*Math.cos(rot+Math.PI/2),-r2*Math.sin(rot+Math.PI/2)*0.28);
+      ctx.lineTo( r2*Math.cos(rot+Math.PI/2), r2*Math.sin(rot+Math.PI/2)*0.28);ctx.stroke();
+      ctx.restore();
+    }
+
+    // Body (main frame)
+    const bsz=sz*0.38;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(p0.x-bsz,p0.y-bsz,bsz*2,bsz*2,4);
+    else ctx.rect(p0.x-bsz,p0.y-bsz,bsz*2,bsz*2);
+    ctx.fillStyle='#eceff4';ctx.fill();
+    ctx.strokeStyle='#8899aa';ctx.lineWidth=1;ctx.stroke();
+
+    // Orange top plate (PoliTo accent)
+    const ps=bsz*0.6;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(p0.x-ps,p0.y-ps,ps*2,ps*2,3);
+    else ctx.rect(p0.x-ps,p0.y-ps,ps*2,ps*2);
+    ctx.fillStyle='#E87722';ctx.fill();
+
+    // Camera gimbal (hanging below)
+    const gc={x:p0.x,y:p0.y+bsz*0.9};
+    ctx.beginPath();ctx.arc(gc.x,gc.y,sz*0.17,0,Math.PI*2);
+    ctx.fillStyle='#1a1a2e';ctx.fill();
+    ctx.beginPath();ctx.arc(gc.x,gc.y,sz*0.09,0,Math.PI*2);
+    ctx.fillStyle='rgba(80,150,255,0.85)';ctx.fill();
+    // Gimbal mount
+    ctx.beginPath();ctx.strokeStyle='#555';ctx.lineWidth=1.2;
+    ctx.moveTo(p0.x-sz*0.12,p0.y+bsz*0.35);ctx.lineTo(gc.x,gc.y);
+    ctx.moveTo(p0.x+sz*0.12,p0.y+bsz*0.35);ctx.lineTo(gc.x,gc.y);ctx.stroke();
+
+    // Blinking LED
+    if(Math.sin(ts*0.006)>0.3){
+      ctx.beginPath();ctx.arc(p0.x-bsz*0.7,p0.y-bsz*0.7,sz*0.09,0,Math.PI*2);
+      ctx.fillStyle='#ff2244';ctx.fill();
+      ctx.beginPath();ctx.arc(p0.x+bsz*0.7,p0.y-bsz*0.7,sz*0.09,0,Math.PI*2);
+      ctx.fillStyle='#22cc44';ctx.fill();
+    }
+  }
+
+  // ── Dimension annotations ──────────────────────────────
+  function drawAnnotations(s){
+    const{La,Lb,B,I,Hd,La_m,Lb_m,B_m,I_m,H_m}=s;
+    const wX=(NF-1)*B+La, wY=(NS-1)*I+Lb;
+    const OG='#E87722', ON='#1C3B6E', OW='#ffffff';
+    const off=0.55;
+
+    // H — vertical arrow on left side
+    const hA=proj(-off,wY*0.5,0), hB=proj(-off,wY*0.5,Hd);
+    dimArrow(hA,hB,OW,`H = ${H_m.toFixed(0)} m`,-18,1.5);
+
+    // La — footprint length, below scene
+    const laA=proj(0,-off,0), laB=proj(La,-off,0);
+    dimArrow(laA,laB,OG,`La = ${La_m.toFixed(1)} m`,-12,1.5);
+
+    // B — base, below scene
+    const bA=proj(La,-off,0), bB=proj(La+B,-off,0);
+    if(B*sc*C30>25) dimArrow(bA,bB,ON,`B = ${B_m.toFixed(1)} m`,-12,1.5);
+
+    // Lb — footprint width, right side
+    const lbA=proj(wX+off,0,0), lbB=proj(wX+off,Lb,0);
+    dimArrow(lbA,lbB,OG,`Lb = ${Lb_m.toFixed(1)} m`,12,1.5);
+
+    // I — interasse, right side
+    const iA=proj(wX+off,Lb,0), iB=proj(wX+off,Lb+I,0);
+    if(I*sc*S30>22) dimArrow(iA,iB,ON,`I = ${I_m.toFixed(1)} m`,12,1.5);
+
+    // p% label on a forward overlap zone
+    const ovX=proj(La+(B-La)/2, wY/6, 0);
+    ctx.font='bold 9.5px Outfit,sans-serif';ctx.textAlign='center';
+    ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=3;ctx.strokeText(`p=${(s.p*100).toFixed(0)}%`,ovX.x,ovX.y);
+    ctx.fillStyle='rgba(255,200,50,0.95)';ctx.fillText(`p=${(s.p*100).toFixed(0)}%`,ovX.x,ovX.y);
+
+    // q% label on a lateral overlap zone
+    const ovY=proj((NF-1)*B/2, Lb+(I-Lb*s.q)/2, 0);
+    ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=3;ctx.strokeText(`q=${(s.q*100).toFixed(0)}%`,ovY.x,ovY.y);
+    ctx.fillStyle='rgba(80,160,240,0.95)';ctx.fillText(`q=${(s.q*100).toFixed(0)}%`,ovY.x,ovY.y);
+  }
+
+  // ── Legend overlay ─────────────────────────────────────
+  function drawLegend(s,W,H){
+    const items=[
+      {c:'rgba(232,119,34,0.7)',  l:'Impronta attiva'},
+      {c:'rgba(232,119,34,0.35)',l:'Frustum ottico'},
+      {c:'rgba(255,200,50,0.5)',  l:`Ric. longitudinale p=${(s.p*100).toFixed(0)}%`},
+      {c:'rgba(80,160,240,0.55)',l:`Ric. trasversale q=${(s.q*100).toFixed(0)}%`},
+    ];
+    const x0=W-205,y0=H-items.length*22-18;
+    ctx.fillStyle='rgba(10,20,40,0.52)';ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(x0-10,y0-8,205,items.length*22+18,8);
+    else ctx.rect(x0-10,y0-8,205,items.length*22+18);
+    ctx.fill();
+    items.forEach(({c,l},i)=>{
+      const y=y0+i*22+5;
+      ctx.fillStyle=c;ctx.fillRect(x0,y-7,14,13);
+      ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=0.5;
+      ctx.strokeRect(x0,y-7,14,13);
+      ctx.fillStyle='rgba(232,240,255,0.88)';ctx.font='10.5px Outfit,sans-serif';
+      ctx.textAlign='left';ctx.fillText(l,x0+19,y+3);
+    });
+  }
+
+  // ── Info panel ─────────────────────────────────────────
+  function updateInfo(s){
+    const el=document.getElementById('iso3dInfo');if(!el)return;
+    el.innerHTML=`
+      <div style="font-weight:700;color:#E87722;margin-bottom:6px;font-size:12px;letter-spacing:.3px">PIANO DI VOLO</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;line-height:1.8">
+        <span style="color:#9ab">H</span><span style="font-family:JetBrains Mono,mono;font-weight:600">${s.H_m.toFixed(0)} m</span>
+        <span style="color:#9ab">GSD</span><span style="font-family:JetBrains Mono,mono;font-weight:600">${s.GSD.toFixed(0)} mm</span>
+        <span style="color:#9ab">La × Lb</span><span style="font-family:JetBrains Mono,mono;font-weight:600">${s.La_m.toFixed(0)}×${s.Lb_m.toFixed(0)} m</span>
+        <span style="color:#9ab">Base B</span><span style="font-family:JetBrains Mono,mono;font-weight:600">${s.B_m.toFixed(1)} m</span>
+        <span style="color:#9ab">Interasse I</span><span style="font-family:JetBrains Mono,mono;font-weight:600">${s.I_m.toFixed(1)} m</span>
+        <span style="color:#9ab">Strisciate</span><span style="font-family:JetBrains Mono,mono;font-weight:600">${NS}</span>
+        <span style="color:#9ab">Fotogrammi</span><span style="font-family:JetBrains Mono,mono;font-weight:600">${NS*NF}</span>
+      </div>`;
+  }
+
+  // ── Main render ────────────────────────────────────────
+  function render(ts){
+    const t=(ts/9000)%1;
+    const s=sd();
+    const W=cv.width,H=cv.height;
+    setupProj(s);
+    ctx.clearRect(0,0,W,H);
+
+    // Sky gradient
+    const sky=ctx.createLinearGradient(0,0,0,H*0.65);
+    sky.addColorStop(0,'#5a9ec4');sky.addColorStop(0.5,'#8ec2dc');sky.addColorStop(1,'#c4dde8');
+    ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+
+    // Horizon haze
+    const haze=ctx.createLinearGradient(0,H*0.4,0,H*0.6);
+    haze.addColorStop(0,'rgba(195,220,200,0)');haze.addColorStop(1,'rgba(195,220,200,0.35)');
+    ctx.fillStyle=haze;ctx.fillRect(0,H*0.4,W,H*0.2);
+
+    const {x:dx,y:dy}=dronePos(t,s);
+
+    drawGround(s);
+    drawFootprints(s);
+    drawFrustum(s,dx,dy);
+    drawAnnotations(s);
+    drawDrone(dx,dy,s.Hd,ts);
+    drawLegend(s,W,H);
+    updateInfo(s);
+
+    animId=requestAnimationFrame(render);
+  }
+
+  return {
+    start(canvasEl){
+      cv=canvasEl;ctx=cv.getContext('2d');
+      if(animId)cancelAnimationFrame(animId);
+      animId=requestAnimationFrame(render);
+    },
+    stop(){ if(animId){cancelAnimationFrame(animId);animId=null;} },
+    isRunning(){ return animId!==null; }
+  };
+})();
+
+// ─── TOOLTIP LOGIC ───────────────────────────────────────────
+let ttTimer = null;
+const ttEl    = document.getElementById('tt');
+const ttTitle = document.getElementById('tt-title');
+const ttBody  = document.getElementById('tt-body');
+const ttFml   = document.getElementById('tt-formula');
+
+function tipShow(e, name, el) {
+  clearTimeout(ttTimer);
+  ttTimer = setTimeout(() => {
+    const tip = TIPS[name]; if (!tip) return;
+    ttTitle.textContent = name;
+    ttBody.textContent  = tip.body;
+    if (tip.formula) {
+      ttFml.style.display = 'block';
+      ttFml.innerHTML = M(tip.formula);
+    } else {
+      ttFml.style.display = 'none';
+    }
+    const existing = ttEl.querySelector('.tt-tag');
+    if (existing) existing.remove();
+    if (tip.tag) {
+      const t = document.createElement('div');
+      t.className = 'tt-tag'; t.textContent = tip.tag;
+      ttEl.appendChild(t);
+    }
+    positionTip(e);
+    ttEl.classList.add('show');
+  }, 650);
+}
+
+function tipHide() {
+  clearTimeout(ttTimer);
+  ttEl.classList.remove('show');
+}
+
+function tipMove(e) {
+  if (ttEl.classList.contains('show')) positionTip(e);
+}
+
+function positionTip(e) {
+  const W = window.innerWidth, H = window.innerHeight;
+  const tw = ttEl.offsetWidth || 300, th = ttEl.offsetHeight || 160;
+  let x = e.clientX + 16, y = e.clientY + 12;
+  if (x + tw > W - 12) x = e.clientX - tw - 12;
+  if (y + th > H - 12) y = e.clientY - th - 12;
+  ttEl.style.left = x + 'px';
+  ttEl.style.top  = y + 'px';
+}
+
+compute();
+</script>
+</body>
+</html>

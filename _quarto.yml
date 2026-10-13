@@ -9,6 +9,7 @@ project:
     - "resources/**/worksheet.html"
     - "resources/**/*.zip"
     - "resources/**/data/*"
+    - "resources/**/lib/**"
 
 website:
   title: "Open Geomatics Education"

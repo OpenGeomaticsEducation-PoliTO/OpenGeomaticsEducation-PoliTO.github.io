@@ -1,0 +1,89 @@
+---
+title: "Photogrammetric Flight Planning"
+description: "Plan an aerial or UAV photogrammetric survey: compute GSD, image scale, ground footprint, base, strip spacing and field angles for 16 real cameras (worksheet in Italian)."
+date: 2026-10-13
+version: "1.0"
+categories: [photogrammetry, flight-planning, uav]
+author:
+  - name: Vincenzo Di Pietra
+    affiliation: Politecnico di Torino, DIATI
+    roles: [conceptualization, writing, software]
+reviewers: ["To be assigned"]
+level: "Bachelor / Master"
+duration: "60–90 min"
+lang: en
+prerequisites: "Central projection and collinearity basics; image scale; units (mm, µm, gon)."
+doi: ""
+include-in-header:
+  - text: |
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Photogrammetric Flight Planning",
+        "alternateName": "Progetto di Presa Fotogrammetrica",
+        "description": "Interactive worksheet to plan an aerial or UAV photogrammetric survey: GSD, image scale, ground footprint, base, strip spacing, field angles and camera comparison.",
+        "educationalLevel": ["Bachelor", "Master"],
+        "timeRequired": "PT90M",
+        "inLanguage": "it",
+        "keywords": "photogrammetry, flight planning, GSD, ground sampling distance, UAV, drone survey, image scale, overlap, geomatics",
+        "learningResourceType": ["interactive worksheet", "simulation"],
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isAccessibleForFree": true,
+        "author": [{"@type": "Person", "name": "Vincenzo Di Pietra", "affiliation": "Politecnico di Torino"}],
+        "publisher": {"@type": "Organization", "name": "Open Geomatics Education Group"}
+      }
+      </script>
+---
+
+::: {.resource-card}
+<a class="launch-btn" href="worksheet.html" target="_blank">▶ Open interactive worksheet</a>
+
+| | |
+|---|---|
+| **Level** | Bachelor / Master |
+| **Duration** | 60–90 min |
+| **Prerequisites** | Central projection basics; image scale; units (mm, µm, gon) |
+| **Worksheet language** | Italian (English version planned) |
+| **Version** | 1.0 (2026-10-13) |
+| **Licence** | Content CC BY 4.0 · Code MIT · KaTeX (MIT) bundled |
+| **Download** | [Offline package (.zip)](resource.zip) |
+:::
+
+## Learning objectives
+
+By the end of this activity, students will be able to:
+
+1. Derive the intrinsic camera parameters that matter for mapping (pixel size, focal length in pixels, crop factor, angular resolution).
+2. Compute image scale, Ground Sampling Distance (GSD) and ground footprint for a given flying height.
+3. Design a block of images by choosing forward (*p*) and side (*q*) overlaps, and compute base and strip spacing.
+4. Compare cameras of different formats (from smartphone sensors to large-format aerial cameras) at the same flying height and justify the choice for a given survey.
+
+## What the worksheet contains
+
+- **Parameters** — camera, ground coverage and resolving power, each with its formula and live value.
+- **Angles & footprint** — field angles (approximate and exact), a 3×3 overlap diagram and the camera–height–footprint geometry.
+- **All formulas** — a single table with every relation and its current numerical value.
+- **Camera comparison** — 16 presets (UAV, DSLR, medium and large format, thermal) compared at the same height.
+- **3D view** — an animated isometric view of the drone, image frustum and footprints.
+
+## Suggested activity
+
+1. Select the *1″ DJI Phantom* preset and find the flying height giving a GSD of 2 cm.
+2. At that height, set *p* = 80 % and *q* = 70 %: compute base and strip spacing, and estimate the number of images for a 500 × 300 m area.
+3. Switch to the *Phase One iXM-RS150F*: at which height do you obtain the same GSD? Discuss the consequences on footprint, number of images and flight time.
+4. Compare the approximate and exact field angles: from which focal length does the difference become relevant?
+
+## For instructors
+
+- Works well live in class: change one input at a time and ask students to predict the effect before revealing it.
+- Common mistakes: mixing mm and m in the scale denominator; confusing linear and areal scale; applying the overlap to the wrong side of the footprint.
+- Extension: link the base-to-height ratio to the expected height precision (σ<sub>Z</sub> ≈ GSD · H/B).
+
+## Credits and citation
+
+Developed within the **Open Geomatics Education Group**.
+Author: Vincenzo Di Pietra (Politecnico di Torino).
+Formula rendering by [KaTeX](https://katex.org) (MIT licence), bundled in `lib/katex/`.
+
+> Di Pietra, V. (2026). *Photogrammetric Flight Planning* (Version 1.0) [Interactive educational material]. Open Geomatics Education Group.
