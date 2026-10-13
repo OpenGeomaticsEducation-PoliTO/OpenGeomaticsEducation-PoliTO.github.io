@@ -12,7 +12,7 @@ author:
 reviewers: ["To be assigned"]
 level: "Bachelor"
 duration: "60 min"
-language: "en"
+lang: en
 prerequisites: "Sexagesimal angles; basic descriptive statistics."
 doi: ""
 include-in-header:
@@ -47,7 +47,7 @@ include-in-header:
 | **Language** | English |
 | **Version** | 1.0 (2026-10-13) |
 | **Licence** | Content CC BY 4.0 · Code MIT |
-{.resource-meta}
+
 :::
 
 ## Learning objectives

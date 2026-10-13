@@ -17,7 +17,7 @@ author:
 reviewers: ["Name Surname (Institution)"]
 level: "Bachelor"                    # Bachelor | Master | PhD | Professional
 duration: "90 min"
-language: "en"
+lang: en
 prerequisites: "List prior knowledge."
 doi: ""                              # filled after Zenodo deposit, e.g. 10.5281/zenodo.1234567
 draft: true                          # remove when ready to publish
@@ -54,7 +54,7 @@ include-in-header:
 | **Version** | 1.0 (2026-10-13) |
 | **Licence** | Content CC BY 4.0 · Code MIT |
 | **Download** | [Offline package (.zip)](resource.zip) |
-{.resource-meta}
+
 :::
 
 ## Learning objectives
