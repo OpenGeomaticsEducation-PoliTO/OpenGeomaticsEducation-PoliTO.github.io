@@ -1,0 +1,43 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "*.qmd"
+    - "resources/*/index.qmd"
+    - "!resources/_template/"
+  resources:
+    - "resources/**/worksheet.html"
+    - "resources/**/*.zip"
+    - "resources/**/data/*"
+
+website:
+  title: "Open Geomatics Education"
+  description: "Free, open educational resources in geomatics, geodesy and surveying — exercises, notes and interactive worksheets."
+  site-url: "https://OpenGeomaticsEducation-PoliTO.github.io"
+  repo-url: "https://github.com/OpenGeomaticsEducation-PoliTO/OpenGeomaticsEducation-PoliTO.github.io"
+  repo-actions: [edit, issue]
+  open-graph: true
+  search: true
+  navbar:
+    left:
+      - href: index.qmd
+        text: Resources
+      - href: about.qmd
+        text: About & Credits
+      - href: contribute.qmd
+        text: Contribute
+    right:
+      - icon: github
+        href: "https://github.com/OpenGeomaticsEducation-PoliTO"
+  page-footer:
+    left: "Content: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) · Code: [MIT](https://opensource.org/license/mit)"
+    right: "Open Geomatics Education Group"
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    css: styles.css
+    toc: true
+    lang: en

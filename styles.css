@@ -1,0 +1,18 @@
+.resource-card {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+}
+.resource-meta { font-size: 0.9rem; }
+.resource-meta td:first-child { font-weight: 600; padding-right: 1rem; white-space: nowrap; }
+.launch-btn {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  background: var(--bs-primary);
+  color: #fff !important;
+  text-decoration: none;
+  font-weight: 600;
+}
+.launch-btn:hover { opacity: 0.9; }

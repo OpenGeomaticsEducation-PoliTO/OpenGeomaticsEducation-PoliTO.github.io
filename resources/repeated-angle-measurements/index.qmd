@@ -1,0 +1,90 @@
+---
+title: "Repeated Angle Measurements"
+description: "Estimate the mean of repeated angle readings, its precision and possible outliers with an interactive worksheet."
+date: 2026-10-13
+version: "1.0"
+categories: [surveying, measurement-theory, statistics]
+author:
+  - name: Vincenzo Di Pietra
+    orcid: 0000-0000-0000-0000
+    affiliation: Politecnico di Torino, DIATI
+    roles: [conceptualization, writing, software]
+reviewers: ["To be assigned"]
+level: "Bachelor"
+duration: "60 min"
+language: "en"
+prerequisites: "Sexagesimal angles; basic descriptive statistics."
+doi: ""
+include-in-header:
+  - text: |
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Repeated Angle Measurements",
+        "description": "Estimate the mean of repeated angle readings, its precision and possible outliers with an interactive worksheet.",
+        "educationalLevel": "Bachelor",
+        "timeRequired": "PT60M",
+        "inLanguage": "en",
+        "keywords": "surveying, angle measurement, standard deviation, measurement theory, geomatics",
+        "learningResourceType": ["exercise", "interactive worksheet"],
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isAccessibleForFree": true,
+        "author": [{"@type": "Person", "name": "Vincenzo Di Pietra", "affiliation": "Politecnico di Torino"}],
+        "publisher": {"@type": "Organization", "name": "Open Geomatics Education Group"}
+      }
+      </script>
+---
+
+::: {.resource-card}
+<a class="launch-btn" href="worksheet.html" target="_blank">▶ Open interactive worksheet</a>
+
+| | |
+|---|---|
+| **Level** | Bachelor |
+| **Duration** | 60 min |
+| **Prerequisites** | Sexagesimal angles; basic descriptive statistics |
+| **Language** | English |
+| **Version** | 1.0 (2026-10-13) |
+| **Licence** | Content CC BY 4.0 · Code MIT |
+{.resource-meta}
+:::
+
+## Learning objectives
+
+By the end of this activity, students will be able to:
+
+1. Compute the most probable value of an angle observed *n* times.
+2. Distinguish the precision of a single observation (σ) from the precision of the mean (σ/√n).
+3. Use residuals to check computations (Σv ≈ 0) and to flag possible outliers.
+4. Explain why repetition reduces random errors but not systematic ones.
+
+## Background
+
+Repeated observations of the same quantity under equal conditions are affected by random errors that, in the long run, cancel out. The arithmetic mean is therefore the best estimate, and the residuals $v_i = x_i - \bar{x}$ provide an empirical measure of precision:
+
+$$
+\sigma = \sqrt{\frac{\sum v_i^2}{n-1}}, \qquad \sigma_{\bar{x}} = \frac{\sigma}{\sqrt{n}}
+$$
+
+The factor $1/\sqrt{n}$ shows a law of diminishing returns: quadrupling the readings only halves the uncertainty of the mean.
+
+## Activity
+
+1. Open the worksheet and inspect the example dataset.
+2. Load a random dataset and compute σ<sub>x̄</sub> by hand; check your answer.
+3. Introduce a gross error and observe how statistics and the outlier flag react.
+4. Discuss the questions at the end of the worksheet in small groups.
+
+## For instructors
+
+- Works well as a 15-minute in-class warm-up before least-squares adjustment.
+- Common mistake: dividing by *n* instead of *n − 1*, or forgetting the √n for the mean.
+- Extension: collect real readings with a total station in the lab and paste them into the worksheet.
+
+## Credits and citation
+
+Developed within the **Open Geomatics Education Group**.
+Author: Vincenzo Di Pietra (Politecnico di Torino).
+
+> Di Pietra, V. (2026). *Repeated Angle Measurements* (Version 1.0) [Interactive educational material]. Open Geomatics Education Group.

@@ -1,0 +1,85 @@
+---
+# ===== RESOURCE CARD — fill in every field =====
+title: "Resource title (short, in English)"
+description: "One-sentence summary: what the learner does and learns."
+date: 2026-10-13
+version: "1.0"
+categories: [topic-1, topic-2]       # e.g. surveying, least-squares, gnss
+author:
+  - name: Name Surname
+    orcid: 0000-0000-0000-0000
+    affiliation: Institution
+    roles: [conceptualization, writing]
+  - name: Name Surname
+    orcid: 0000-0000-0000-0000
+    affiliation: Institution
+    roles: [software]
+reviewers: ["Name Surname (Institution)"]
+level: "Bachelor"                    # Bachelor | Master | PhD | Professional
+duration: "90 min"
+language: "en"
+prerequisites: "List prior knowledge."
+doi: ""                              # filled after Zenodo deposit, e.g. 10.5281/zenodo.1234567
+draft: true                          # remove when ready to publish
+# ===== DO NOT EDIT BELOW (search-engine metadata) =====
+include-in-header:
+  - text: |
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Resource title (short, in English)",
+        "description": "One-sentence summary.",
+        "educationalLevel": "Bachelor",
+        "timeRequired": "PT90M",
+        "inLanguage": "en",
+        "learningResourceType": ["exercise", "interactive worksheet"],
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "isAccessibleForFree": true,
+        "author": [{"@type": "Person", "name": "Name Surname", "identifier": "https://orcid.org/0000-0000-0000-0000"}],
+        "publisher": {"@type": "Organization", "name": "Open Geomatics Education Group"}
+      }
+      </script>
+---
+
+::: {.resource-card}
+<a class="launch-btn" href="worksheet.html" target="_blank">▶ Open interactive worksheet</a>
+
+| | |
+|---|---|
+| **Level** | Bachelor |
+| **Duration** | 90 min |
+| **Prerequisites** | … |
+| **Language** | English |
+| **Version** | 1.0 (2026-10-13) |
+| **Licence** | Content CC BY 4.0 · Code MIT |
+| **Download** | [Offline package (.zip)](resource.zip) |
+{.resource-meta}
+:::
+
+## Learning objectives
+
+By the end of this activity, students will be able to:
+
+1. …
+2. …
+3. …
+
+## Background
+
+Short conceptual introduction (with formulas if needed: $\hat{x} = (A^T P A)^{-1} A^T P \ell$).
+
+## Activity
+
+Step-by-step instructions linking to the worksheet.
+
+## For instructors
+
+Suggested use in class, common student mistakes, discussion questions. *(Solutions may be kept in the private repository `instructor-solutions` — ask the maintainers.)*
+
+## Credits and citation
+
+Developed within the **Open Geomatics Education Group**.
+Authors: …  · Reviewers: …
+
+> Surname, N., Surname, N. (2026). *Resource title* (Version 1.0) [Educational material]. Open Geomatics Education Group. https://doi.org/…

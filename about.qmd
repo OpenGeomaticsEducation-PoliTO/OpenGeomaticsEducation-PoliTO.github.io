@@ -1,0 +1,35 @@
+---
+title: "About & Credits"
+---
+
+## Who we are
+
+The **Open Geomatics Education Group** is a collective of university teachers and researchers in geomatics, geodesy, surveying and geospatial sciences. The collection is published under the group's name; each resource lists its individual authors, contributors and reviewers.
+
+## Members
+
+| Name | Affiliation | ORCID | Role |
+|---|---|---|---|
+| Vincenzo Di Pietra | Politecnico di Torino, DIATI | [0000-0000-0000-0000](https://orcid.org/0000-0000-0000-0000) | Maintainer |
+| *Name Surname* | *Institution* | *ORCID* | Maintainer |
+| *Name Surname* | *Institution* | *ORCID* | Contributor |
+
+Contribution roles follow the [CRediT taxonomy](https://credit.niso.org/) (Conceptualization, Writing, Software, Review & Editing, …).
+
+## How to cite
+
+**The whole collection**
+
+> Open Geomatics Education Group (2026). *Open Geomatics Education: open teaching resources in geomatics* (Version 1.0) [Educational material]. Zenodo. https://doi.org/10.5281/zenodo.XXXXXXX
+
+**A single resource** — use the citation shown on its page, which includes its own authors and DOI.
+
+## Licences
+
+- Text, exercises, figures and worksheets content: [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+- Source code (JavaScript, Python, CSS): [MIT License](https://opensource.org/license/mit).
+- Third-party material (photos, maps, datasets) is excluded and marked with its own licence where it appears.
+
+## Funding and acknowledgements
+
+*List here any projects or institutions that supported the creation of specific resources.*

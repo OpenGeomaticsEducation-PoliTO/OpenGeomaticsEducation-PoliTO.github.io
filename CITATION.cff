@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use these materials, please cite them as below."
+type: dataset
+title: "Open Geomatics Education: open teaching resources in geomatics"
+version: "1.0.0"
+date-released: 2026-10-13
+license: CC-BY-4.0
+repository-code: "https://github.com/OpenGeomaticsEducation-PoliTO/OpenGeomaticsEducation-PoliTO.github.io"
+url: "https://OpenGeomaticsEducation-PoliTO.github.io"
+keywords:
+  - geomatics
+  - geodesy
+  - surveying
+  - open educational resources
+  - OER
+authors:
+  - name: "Open Geomatics Education Group"
+  - family-names: "Di Pietra"
+    given-names: "Vincenzo"
+    affiliation: "Politecnico di Torino"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+  # - family-names: "Surname"
+  #   given-names: "Name"
+  #   affiliation: "Institution"
+  #   orcid: "https://orcid.org/0000-0000-0000-0000"

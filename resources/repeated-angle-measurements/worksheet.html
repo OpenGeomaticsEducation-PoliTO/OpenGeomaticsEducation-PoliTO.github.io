@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repeated Angle Measurements</title>
+<style>
+  :root { --fg:#1d2430; --bg:#fff; --muted:#5b6575; --line:#d7dce3; --acc:#1f6feb; --ok:#1a7f37; --bad:#c62828; --soft:#f4f6f9; }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg:#e6e9ee; --bg:#14181f; --muted:#9aa4b2; --line:#2e3542; --acc:#58a6ff; --ok:#3fb950; --bad:#f85149; --soft:#1c222c; }
+  }
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; color: var(--fg); background: var(--bg);
+         max-width: 900px; margin: 0 auto; padding: 1.5rem 16px 3rem; line-height: 1.55; }
+  h1 { margin-bottom: .2rem; } .sub { color: var(--muted); margin-top: 0; }
+  section { border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.25rem; margin: 1.25rem 0; }
+  h2 { font-size: 1.15rem; margin-top: 0; }
+  textarea { width: 100%; min-height: 9rem; font-family: ui-monospace, Consolas, monospace; font-size: .95rem;
+             background: var(--soft); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: .6rem; }
+  input[type=text] { font-family: ui-monospace, Consolas, monospace; padding: .35rem .5rem; width: 11rem;
+             background: var(--soft); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; }
+  button { background: var(--acc); color: #fff; border: 0; border-radius: 6px; padding: .5rem 1rem; font-weight: 600; cursor: pointer; margin: .4rem .4rem 0 0; }
+  button.secondary { background: transparent; color: var(--acc); border: 1px solid var(--acc); }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { border-bottom: 1px solid var(--line); padding: .35rem .5rem; text-align: right; font-family: ui-monospace, Consolas, monospace; }
+  th { text-align: right; font-family: inherit; color: var(--muted); font-weight: 600; }
+  th:first-child, td:first-child { text-align: left; }
+  tr.flag td { color: var(--bad); font-weight: 600; }
+  .result { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .75rem; margin: 1rem 0; }
+  .tile { background: var(--soft); border-radius: 8px; padding: .6rem .8rem; }
+  .tile .k { font-size: .8rem; color: var(--muted); } .tile .v { font-family: ui-monospace, Consolas, monospace; font-size: 1.05rem; }
+  .msg { padding: .5rem .75rem; border-radius: 6px; margin-top: .6rem; }
+  .msg.ok { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+  .msg.bad { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
+  .formula { background: var(--soft); border-radius: 6px; padding: .5rem .8rem; font-family: ui-monospace, Consolas, monospace; overflow-x: auto; }
+  svg { width: 100%; height: auto; display: block; }
+  footer { margin-top: 2.5rem; font-size: .85rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 1rem; }
+  a { color: var(--acc); }
+</style>
+</head>
+<body>
+
+<h1>Repeated Angle Measurements</h1>
+<p class="sub">Interactive worksheet · Bachelor level · ~60 min</p>
+
+<section>
+  <h2>1 · Theory in brief</h2>
+  <p>When the same angle is observed <i>n</i> times under equal conditions, the best estimate is the arithmetic mean. The spread of the residuals tells us about the precision of a <b>single</b> observation; dividing by √n gives the precision of the <b>mean</b>.</p>
+  <div class="formula">
+    x̄ = Σ xᵢ / n &nbsp;&nbsp;&nbsp; vᵢ = xᵢ − x̄ &nbsp;&nbsp;&nbsp; σ = √( Σ vᵢ² / (n − 1) ) &nbsp;&nbsp;&nbsp; σ<sub>x̄</sub> = σ / √n
+  </div>
+  <p>Check: Σ vᵢ must be ≈ 0. Observations with |vᵢ| &gt; 3σ are flagged as possible outliers (to be investigated, not deleted automatically).</p>
+</section>
+
+<section>
+  <h2>2 · Compute with your own data</h2>
+  <p>Enter one reading per line, in <b>degrees minutes seconds</b> separated by spaces (e.g. <code>47 23 15.4</code>) or decimal degrees.</p>
+  <textarea id="data">47 23 15.4
+47 23 18.1
+47 23 16.0
+47 23 14.2
+47 23 17.5
+47 23 15.9
+47 23 16.8
+47 23 13.7</textarea>
+  <button id="calc">Compute</button>
+  <button class="secondary" id="noise">Load random dataset</button>
+  <div id="out"></div>
+</section>
+
+<section>
+  <h2>3 · Check yourself</h2>
+  <p>Using the dataset above, compute <b>by hand or with a calculator</b> the standard deviation of the mean σ<sub>x̄</sub> (in arc-seconds, 1 decimal) and enter it below.</p>
+  <input type="text" id="guess" placeholder="e.g. 0.6"> <button id="check">Check</button>
+  <div id="checkmsg"></div>
+</section>
+
+<section>
+  <h2>4 · Questions for discussion</h2>
+  <ol>
+    <li>How many repetitions are needed to halve σ<sub>x̄</sub>? What are the practical limits of this strategy?</li>
+    <li>Does averaging reduce systematic errors (e.g. collimation error)? How do face-left/face-right observations help?</li>
+    <li>Add a reading wrong by 20″. How do the mean, σ and the outlier flag react?</li>
+  </ol>
+</section>
+
+<footer>
+  Developed within the <b>Open Geomatics Education Group</b> · Author: V. Di Pietra (Politecnico di Torino) · Version 1.0, 2026<br>
+  Content <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · Code MIT ·
+  <a href="https://github.com/OpenGeomaticsEducation-PoliTO/OpenGeomaticsEducation-PoliTO.github.io/issues/new/choose">Report an error</a>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var last = null;
+
+  function parseLine(s) {
+    var p = s.trim().split(/[\s°'"′″:]+/).filter(Boolean).map(Number);
+    if (!p.length || p.some(isNaN)) return null;
+    if (p.length === 1) return p[0];
+    var sign = p[0] < 0 ? -1 : 1;
+    return sign * (Math.abs(p[0]) + (p[1] || 0) / 60 + (p[2] || 0) / 3600);
+  }
+  function toDMS(deg) {
+    var sign = deg < 0 ? "−" : ""; deg = Math.abs(deg);
+    var d = Math.floor(deg), mf = (deg - d) * 60, m = Math.floor(mf), s = (mf - m) * 60;
+    if (s >= 59.995) { s = 0; m += 1; } if (m === 60) { m = 0; d += 1; }
+    return sign + d + "° " + String(m).padStart(2, "0") + "′ " + s.toFixed(2).padStart(5, "0") + "″";
+  }
+  function esc(t) { return String(t).replace(/[&<>]/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]; }); }
+
+  function compute() {
+    var lines = document.getElementById("data").value.split("\n").filter(function (l) { return l.trim(); });
+    var out = document.getElementById("out");
+    var xs = [], bad = [];
+    lines.forEach(function (l, i) { var v = parseLine(l); if (v === null) bad.push(i + 1); else xs.push(v); });
+    if (bad.length) { out.innerHTML = '<div class="msg bad">Cannot read line(s): ' + bad.join(", ") + '</div>'; last = null; return; }
+    if (xs.length < 2) { out.innerHTML = '<div class="msg bad">Enter at least 2 readings.</div>'; last = null; return; }
+
+    var n = xs.length;
+    // work in arc-seconds relative to the first reading for numerical stability
+    var ref = xs[0];
+    var rs = xs.map(function (x) { return (x - ref) * 3600; });
+    var meanR = rs.reduce(function (a, b) { return a + b; }, 0) / n;
+    var v = rs.map(function (r) { return r - meanR; });
+    var sumV = v.reduce(function (a, b) { return a + b; }, 0);
+    var sigma = Math.sqrt(v.reduce(function (a, b) { return a + b * b; }, 0) / (n - 1));
+    var sigmaM = sigma / Math.sqrt(n);
+    var mean = ref + meanR / 3600;
+    last = { sigmaM: sigmaM };
+
+    var rows = xs.map(function (x, i) {
+      var flag = Math.abs(v[i]) > 3 * sigma;
+      return '<tr' + (flag ? ' class="flag"' : '') + '><td>' + (i + 1) + '</td><td>' + toDMS(x) + '</td><td>' +
+             (v[i] >= 0 ? "+" : "") + v[i].toFixed(2) + '</td><td>' + (v[i] * v[i]).toFixed(3) + '</td><td>' + (flag ? "&gt; 3σ" : "") + '</td></tr>';
+    }).join("");
+
+    out.innerHTML =
+      '<div class="result">' +
+      tile("Number of readings n", n) +
+      tile("Mean x̄", toDMS(mean)) +
+      tile("σ single reading", sigma.toFixed(2) + "″") +
+      tile("σ of the mean", sigmaM.toFixed(2) + "″") +
+      tile("Check Σv", sumV.toExponential(1) + "″") +
+      '</div>' + plot(v, sigma) +
+      '<table><thead><tr><th>#</th><th>Reading</th><th>v (″)</th><th>v² (″²)</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
+  }
+  function tile(k, val) { return '<div class="tile"><div class="k">' + esc(k) + '</div><div class="v">' + esc(val) + '</div></div>'; }
+
+  function plot(v, sigma) {
+    var W = 640, H = 200, pad = 36, n = v.length;
+    var lim = Math.max(3 * sigma, Math.max.apply(null, v.map(Math.abs))) * 1.15 || 1;
+    function X(i) { return pad + (n === 1 ? 0 : i * (W - 2 * pad) / (n - 1)); }
+    function Y(y) { return H / 2 - y / lim * (H / 2 - 16); }
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Residuals plot">';
+    s += '<rect x="' + pad + '" y="' + Y(3 * sigma) + '" width="' + (W - 2 * pad) + '" height="' + (Y(-3 * sigma) - Y(3 * sigma)) + '" fill="var(--soft)"/>';
+    s += '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + Y(0) + '" y2="' + Y(0) + '" stroke="var(--muted)"/>';
+    [1, -1].forEach(function (k) {
+      s += '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + Y(k * 3 * sigma) + '" y2="' + Y(k * 3 * sigma) + '" stroke="var(--bad)" stroke-dasharray="4 4"/>';
+    });
+    s += '<text x="' + (W - pad) + '" y="' + (Y(3 * sigma) - 4) + '" text-anchor="end" font-size="11" fill="var(--bad)">+3σ</text>';
+    s += '<text x="4" y="' + (Y(0) + 4) + '" font-size="11" fill="var(--muted)">0″</text>';
+    v.forEach(function (y, i) {
+      var out = Math.abs(y) > 3 * sigma;
+      s += '<line x1="' + X(i) + '" x2="' + X(i) + '" y1="' + Y(0) + '" y2="' + Y(y) + '" stroke="var(--acc)" stroke-width="2"/>';
+      s += '<circle cx="' + X(i) + '" cy="' + Y(y) + '" r="5" fill="' + (out ? "var(--bad)" : "var(--acc)") + '"><title>#' + (i + 1) + ': ' + y.toFixed(2) + '″</title></circle>';
+    });
+    return s + '</svg><p style="font-size:.85rem;color:var(--muted)">Residuals vᵢ in arc-seconds; shaded band = ±3σ.</p>';
+  }
+
+  function randomData() {
+    var n = 6 + Math.floor(Math.random() * 7);
+    var base = 20 + Math.random() * 300, sd = 1 + Math.random() * 3, L = [];
+    for (var i = 0; i < n; i++) {
+      var g = Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random());
+      var x = base + g * sd / 3600;
+      var d = Math.floor(x), mf = (x - d) * 60, m = Math.floor(mf), sec = (mf - m) * 60;
+      L.push(d + " " + m + " " + sec.toFixed(1));
+    }
+    document.getElementById("data").value = L.join("\n");
+    document.getElementById("out").innerHTML = "";
+    document.getElementById("checkmsg").innerHTML = "";
+    last = null;
+  }
+
+  function check() {
+    var msg = document.getElementById("checkmsg");
+    if (!last) compute();
+    if (!last) return;
+    var g = parseFloat(document.getElementById("guess").value.replace(",", "."));
+    if (isNaN(g)) { msg.innerHTML = '<div class="msg bad">Enter a number.</div>'; return; }
+    var ok = Math.abs(g - last.sigmaM) <= 0.06;
+    msg.innerHTML = ok
+      ? '<div class="msg ok">Correct! σ<sub>x̄</sub> = ' + last.sigmaM.toFixed(2) + '″</div>'
+      : '<div class="msg bad">Not quite. Hint: did you divide by (n − 1) for σ, and then by √n?</div>';
+  }
+
+  document.getElementById("calc").addEventListener("click", compute);
+  document.getElementById("noise").addEventListener("click", randomData);
+  document.getElementById("check").addEventListener("click", check);
+  compute();
+})();
+</script>
+</body>
+</html>

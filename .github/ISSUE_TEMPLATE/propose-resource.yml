@@ -1,0 +1,25 @@
+name: Propose a new resource
+description: Suggest an exercise, notes or worksheet you would like to contribute.
+labels: [new-resource]
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Working title
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary and learning objectives
+    validations:
+      required: true
+  - type: dropdown
+    id: level
+    attributes:
+      label: Level
+      options: [Bachelor, Master, PhD, Professional]
+  - type: input
+    id: authors
+    attributes:
+      label: Authors (name, institution, ORCID)

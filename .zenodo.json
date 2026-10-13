@@ -1,0 +1,21 @@
+{
+  "title": "Open Geomatics Education: open teaching resources in geomatics",
+  "upload_type": "lesson",
+  "description": "<p>A collection of free, open educational resources in geomatics, geodesy and surveying: exercises, lecture notes and self-contained interactive HTML worksheets, developed by the Open Geomatics Education Group. Each resource lists its individual authors and reviewers.</p><p>Live version: <a href=\"https://OpenGeomaticsEducation-PoliTO.github.io\">https://OpenGeomaticsEducation-PoliTO.github.io</a></p>",
+  "creators": [
+    { "name": "Open Geomatics Education Group" },
+    { "name": "Di Pietra, Vincenzo", "affiliation": "Politecnico di Torino", "orcid": "0000-0000-0000-0000" }
+  ],
+  "contributors": [
+    { "name": "Surname, Name", "affiliation": "Institution", "type": "Editor" }
+  ],
+  "license": "cc-by-4.0",
+  "access_right": "open",
+  "language": "eng",
+  "keywords": ["geomatics", "geodesy", "surveying", "open educational resources", "OER", "interactive worksheets"],
+  "communities": [{ "identifier": "opengeomaticseducation" }],
+  "related_identifiers": [
+    { "identifier": "https://OpenGeomaticsEducation-PoliTO.github.io", "relation": "isDocumentedBy", "scheme": "url" }
+  ],
+  "grants": []
+}

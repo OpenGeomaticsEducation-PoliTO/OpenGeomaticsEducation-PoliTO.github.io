@@ -1,0 +1,27 @@
+---
+title: "Open Geomatics Education"
+subtitle: "Free and open teaching resources in geomatics, geodesy and surveying"
+listing:
+  contents: "resources/*/index.qmd"
+  type: table
+  fields: [title, description, categories, date]
+  field-display-names:
+    title: Resource
+    description: Description
+    categories: Topics
+    date: Updated
+  sort: "date desc"
+  categories: true
+  filter-ui: true
+  sort-ui: true
+toc: false
+---
+
+We are an international group of university teachers and researchers who share exercises, lecture notes and interactive HTML worksheets for **free use, adaptation and redistribution**.
+
+- **Use them** in your classes, self-study or professional training — no registration, no installation.
+- **Adapt them** — all content is released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), code under MIT.
+- **Cite them** — stable versions are archived on [Zenodo](https://zenodo.org/communities/opengeomaticseducation) with a DOI.
+- **Improve them** — found an error? Use the *Report an issue* link on every page.
+
+## Resources

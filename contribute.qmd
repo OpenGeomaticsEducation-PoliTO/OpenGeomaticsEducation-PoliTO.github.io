@@ -1,0 +1,24 @@
+---
+title: "Contribute"
+---
+
+Everyone is welcome to improve these resources — no programming skills required.
+
+## Report an error or suggest an improvement
+
+Open an [issue](https://github.com/OpenGeomaticsEducation-PoliTO/OpenGeomaticsEducation-PoliTO.github.io/issues/new/choose) using the *Report an error* form. You only need a free GitHub account.
+
+## Fix a typo directly in the browser
+
+1. Click **Edit this page** at the bottom of any page.
+2. Make your change in the GitHub editor.
+3. Click **Propose changes** — a maintainer will review it.
+
+## Add a new resource
+
+1. Copy the folder `resources/_template/` and rename it (lowercase, hyphens: `least-squares-adjustment`).
+2. Fill in the metadata at the top of `index.qmd` (title, authors, level, duration, learning objectives…).
+3. Put your interactive worksheet in `worksheet.html` (self-contained, no external CDNs).
+4. Open a pull request. At least one other member reviews it before publication.
+
+Full guidelines: [CONTRIBUTING.md](https://github.com/OpenGeomaticsEducation-PoliTO/OpenGeomaticsEducation-PoliTO.github.io/blob/main/CONTRIBUTING.md).

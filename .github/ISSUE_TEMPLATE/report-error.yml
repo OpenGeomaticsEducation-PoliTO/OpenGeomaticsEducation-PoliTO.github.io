@@ -1,0 +1,27 @@
+name: Report an error
+description: Found a mistake in a formula, text or worksheet? Tell us.
+labels: [error]
+body:
+  - type: input
+    id: resource
+    attributes:
+      label: Resource
+      description: Title or URL of the page/worksheet
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong?
+      description: Describe the error and, if possible, the correct version.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type
+      options: [Formula / numerical result, Text / typo, Worksheet not working, Accessibility, Other]
+  - type: input
+    id: who
+    attributes:
+      label: Your name and institution (optional, to credit you)
